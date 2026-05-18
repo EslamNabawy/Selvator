@@ -327,10 +327,16 @@ void main() {
     );
 
     expect(find.textContaining('Stay with the breath'), findsOneWidget);
+    expect(find.text('Skip breathing'), findsOneWidget);
     expect(
       find.text('A steady quote designed for widget testing action callbacks.'),
       findsNothing,
     );
+
+    await tester.tap(find.text('Skip breathing'));
+    await tester.pump();
+
+    expect(controller.decompressionCompleted, isTrue);
     expect(tester.takeException(), isNull);
   });
 
@@ -640,6 +646,7 @@ class _FakeWiselyController implements WiselyController {
   String? savedNote;
   String? deletedEntryId;
   bool refreshed = false;
+  bool decompressionCompleted = false;
 
   @override
   Future<void> refreshQuote() async {
@@ -717,7 +724,9 @@ class _FakeWiselyController implements WiselyController {
   }
 
   @override
-  Future<void> completeDecompression() async {}
+  Future<void> completeDecompression() async {
+    decompressionCompleted = true;
+  }
 
   @override
   Future<void> saveMoodJournalNote(String note) async {

@@ -839,7 +839,10 @@ class _DecompressScreenState extends State<DecompressScreen>
   @override
   void initState() {
     super.initState();
-    _breathController = AnimationController(vsync: this);
+    _breathController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: _cycleSeconds),
+    )..repeat(reverse: true);
     _start();
   }
 
@@ -882,6 +885,13 @@ class _DecompressScreenState extends State<DecompressScreen>
     }
   }
 
+  Future<void> _skipBreathing() async {
+    _timer?.cancel();
+    _breathController.stop();
+    unawaited(HapticFeedback.selectionClick());
+    await widget.controller.completeDecompression();
+  }
+
   @override
   Widget build(BuildContext context) {
     final mood =
@@ -895,72 +905,360 @@ class _DecompressScreenState extends State<DecompressScreen>
       DecompressState.complete => 'Ready',
       _ => 'Inhale',
     };
+    final phaseTitle = switch (phase) {
+      DecompressState.hold => 'Hold the quiet',
+      DecompressState.exhale => 'Let the weight leave',
+      DecompressState.complete => 'Quote is ready',
+      _ => 'Draw the air in',
+    };
+    final phaseBody = switch (phase) {
+      DecompressState.hold => 'Stay still for a beat. Nothing needs fixing.',
+      DecompressState.exhale => 'Drop your shoulders and let the day loosen.',
+      DecompressState.complete => 'Selvator has the quote waiting for you.',
+      _ => 'Slow breath through the nose. Give yourself room first.',
+    };
+    final cycle = (_elapsed ~/ _cycleSeconds).clamp(0, 2) + 1;
+    final secondsLeft = (_totalSeconds - _elapsed).clamp(0, _totalSeconds);
+    final phone = MediaQuery.sizeOf(context).width < 420;
 
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(phone ? 16 : 24),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
+          constraints: const BoxConstraints(maxWidth: 620),
           child: Container(
-            padding: const EdgeInsets.all(28),
+            padding: EdgeInsets.all(phone ? 20 : 28),
             decoration: BoxDecoration(
-              color: context.glassSurfaceHigh(lightAlpha: 0.9, darkAlpha: 0.94),
-              borderRadius: BorderRadius.circular(34),
+              gradient: LinearGradient(
+                colors: [
+                  context.glassSurfaceHigh(lightAlpha: 0.92, darkAlpha: 0.94),
+                  accent.withValues(alpha: context.isDarkMode ? 0.18 : 0.24),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(phone ? 28 : 34),
               border: Border.all(color: context.surfaceStroke()),
+              boxShadow: [
+                BoxShadow(
+                  color: accent.withValues(
+                    alpha: context.isDarkMode ? 0.14 : 0.18,
+                  ),
+                  blurRadius: 44,
+                  offset: const Offset(0, 18),
+                ),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SilvatorMascotAvatar(
+                Row(
+                  children: [
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: context.accentSurface(accent),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: context.surfaceStroke()),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: SilvatorMascotAvatar(
+                        mood: mood,
+                        width: 56,
+                        height: 56,
+                        fit: BoxFit.contain,
+                        semanticLabel: '${mood.label} decompression mascot',
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Decompression',
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Cycle $cycle of 3',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: _skipBreathing,
+                      icon: const Icon(Icons.close_rounded),
+                      label: Text(phone ? 'Skip' : 'Skip breathing'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _BreathingStage(
+                  animation: _breathController,
+                  phase: phase,
+                  phaseLabel: phaseLabel,
                   mood: mood,
-                  width: 96,
-                  height: 104,
-                  fit: BoxFit.contain,
-                  semanticLabel: '${mood.label} decompression mascot',
+                  accent: accent,
+                  size: phone ? 224 : 264,
                 ),
+                const SizedBox(height: 22),
+                _BreathCycleDots(cycle: cycle, accent: accent),
                 const SizedBox(height: 18),
-                SizedBox(
-                  width: 220,
-                  height: 220,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Lottie.asset(
-                        'assets/animations/breathing_circle.json',
-                        controller: _breathController,
-                        onLoaded: (composition) {
-                          _breathController
-                            ..duration = const Duration(seconds: _cycleSeconds)
-                            ..repeat(reverse: true);
-                        },
-                      ),
-                      Text(
-                        phaseLabel,
-                        style: Theme.of(context).textTheme.headlineSmall
-                            ?.copyWith(color: context.brandInk()),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                LinearProgressIndicator(
-                  value: progress,
-                  minHeight: 8,
+                ClipRRect(
                   borderRadius: BorderRadius.circular(999),
-                  color: accent,
-                  backgroundColor: context.surfaceStroke(),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 9,
+                    color: accent,
+                    backgroundColor: context.surfaceStroke(),
+                  ),
                 ),
                 const SizedBox(height: 18),
                 Text(
-                  'Stay with the breath. Selvator will show the quote when this settles.',
+                  phaseTitle,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: context.brandInk(),
+                    height: 1.08,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '$phaseBody Stay with the breath. $secondsLeft seconds left.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(height: 1.45),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: _skipBreathing,
+                  icon: const Icon(Icons.close_rounded),
+                  label: const Text('Show quote now'),
                 ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BreathingStage extends StatelessWidget {
+  const _BreathingStage({
+    required this.animation,
+    required this.phase,
+    required this.phaseLabel,
+    required this.mood,
+    required this.accent,
+    required this.size,
+  });
+
+  final Animation<double> animation;
+  final DecompressState phase;
+  final String phaseLabel;
+  final MoodType mood;
+  final Color accent;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final motionDisabled = MediaQuery.disableAnimationsOf(context);
+    if (motionDisabled) {
+      return _BreathingStageFrame(
+        phase: phase,
+        phaseLabel: phaseLabel,
+        mood: mood,
+        accent: accent,
+        size: size,
+        value: 0.65,
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        return _BreathingStageFrame(
+          phase: phase,
+          phaseLabel: phaseLabel,
+          mood: mood,
+          accent: accent,
+          size: size,
+          value: animation.value,
+          lottie: Lottie.asset(
+            'assets/animations/breathing_circle.json',
+            controller: animation,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _BreathingStageFrame extends StatelessWidget {
+  const _BreathingStageFrame({
+    required this.phase,
+    required this.phaseLabel,
+    required this.mood,
+    required this.accent,
+    required this.size,
+    required this.value,
+    this.lottie,
+  });
+
+  final DecompressState phase;
+  final String phaseLabel;
+  final MoodType mood;
+  final Color accent;
+  final double size;
+  final double value;
+  final Widget? lottie;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = context.isDarkMode;
+    final phaseScale = switch (phase) {
+      DecompressState.hold => 1.03,
+      DecompressState.exhale => 1.08 - (value * 0.14),
+      DecompressState.complete => 1.0,
+      _ => 0.92 + (value * 0.14),
+    };
+    final ringAlpha = switch (phase) {
+      DecompressState.exhale => 0.12 + (value * 0.08),
+      DecompressState.hold => 0.18,
+      _ => 0.16 + (value * 0.10),
+    };
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Transform.scale(
+            scale: phaseScale,
+            child: Container(
+              width: size * 0.96,
+              height: size * 0.96,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: accent.withValues(alpha: dark ? 0.24 : 0.34),
+                  width: 1.4,
+                ),
+                gradient: RadialGradient(
+                  colors: [
+                    accent.withValues(alpha: ringAlpha),
+                    accent.withValues(alpha: ringAlpha * 0.44),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.58, 1.0],
+                ),
+              ),
+            ),
+          ),
+          Transform.scale(
+            scale: 0.88 + (phaseScale - 1).abs(),
+            child: Container(
+              width: size * 0.72,
+              height: size * 0.72,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: context.glassSurface(lightAlpha: 0.52, darkAlpha: 0.54),
+                border: Border.all(color: context.surfaceStroke()),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(alpha: dark ? 0.16 : 0.20),
+                    blurRadius: 34,
+                    offset: const Offset(0, 16),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (lottie != null)
+            Opacity(
+              opacity: dark ? 0.26 : 0.34,
+              child: SizedBox(
+                width: size * 0.86,
+                height: size * 0.86,
+                child: lottie,
+              ),
+            ),
+          Container(
+            width: size * 0.44,
+            height: size * 0.50,
+            decoration: BoxDecoration(
+              color: context.accentSurface(accent, lightAlpha: 0.18),
+              borderRadius: BorderRadius.circular(size * 0.16),
+              border: Border.all(color: context.surfaceStroke()),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: SilvatorMascotAvatar(
+              mood: mood,
+              width: size * 0.44,
+              height: size * 0.50,
+              fit: BoxFit.contain,
+              semanticLabel: '${mood.label} breathing mascot',
+            ),
+          ),
+          Positioned(
+            bottom: size * 0.12,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: context.glassSurface(lightAlpha: 0.76, darkAlpha: 0.82),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: context.surfaceStroke()),
+              ),
+              child: Text(
+                phaseLabel,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: context.brandInk(),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BreathCycleDots extends StatelessWidget {
+  const _BreathCycleDots({required this.cycle, required this.accent});
+
+  final int cycle;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (var index = 1; index <= 3; index++) ...[
+          AnimatedContainer(
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 260),
+            curve: Curves.easeOutCubic,
+            width: index == cycle ? 36 : 14,
+            height: 10,
+            decoration: BoxDecoration(
+              color: index <= cycle
+                  ? accent.withValues(alpha: index == cycle ? 0.86 : 0.52)
+                  : context.surfaceStroke(),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+          if (index < 3) const SizedBox(width: 8),
+        ],
+      ],
     );
   }
 }
