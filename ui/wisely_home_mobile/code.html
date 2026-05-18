@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.material.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#ff75a2",
+                    "on-tertiary": "#ffeff1",
+                    "on-primary-fixed": "#3d2500",
+                    "inverse-surface": "#0c0f10",
+                    "error-container": "#f74b6d",
+                    "secondary-fixed-dim": "#71d7cd",
+                    "tertiary": "#a7295a",
+                    "primary-fixed-dim": "#eea840",
+                    "primary-dim": "#6f4700",
+                    "surface-tint": "#7f5200",
+                    "on-secondary": "#bffff7",
+                    "secondary-dim": "#005a54",
+                    "on-error": "#ffefef",
+                    "on-error-container": "#510017",
+                    "surface-dim": "#d1d5d7",
+                    "surface-container-high": "#e0e3e4",
+                    "on-tertiary-fixed": "#380017",
+                    "on-secondary-container": "#00534d",
+                    "on-secondary-fixed": "#003e39",
+                    "background": "#f5f6f7",
+                    "outline-variant": "#abadae",
+                    "surface-container-highest": "#dadddf",
+                    "error": "#b41340",
+                    "tertiary-container": "#ff8eaf",
+                    "on-primary": "#fff0e2",
+                    "on-background": "#2c2f30",
+                    "on-secondary-fixed-variant": "#005d57",
+                    "inverse-on-surface": "#9b9d9e",
+                    "primary": "#7f5200",
+                    "on-surface-variant": "#595c5d",
+                    "secondary-fixed": "#7fe6db",
+                    "secondary-container": "#7fe6db",
+                    "surface": "#f5f6f7",
+                    "on-tertiary-fixed-variant": "#760038",
+                    "tertiary-fixed": "#ff8eaf",
+                    "secondary": "#006760",
+                    "on-tertiary-container": "#66002f",
+                    "outline": "#757778",
+                    "on-surface": "#2c2f30",
+                    "primary-container": "#feb64c",
+                    "error-dim": "#a70138",
+                    "on-primary-container": "#583700",
+                    "surface-variant": "#dadddf",
+                    "on-primary-fixed-variant": "#644000",
+                    "inverse-primary": "#feb64c",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#eff1f2",
+                    "tertiary-dim": "#971b4e",
+                    "primary-fixed": "#feb64c",
+                    "surface-container": "#e6e8ea",
+                    "surface-bright": "#f5f6f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .organic-blob {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            background: linear-gradient(45deg, #feb64c, #7fe6db);
+            filter: blur(60px);
+            opacity: 0.15;
+            z-index: -1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container/30">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.04)]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-700 dark:text-indigo-300" data-icon="bubble_chart">bubble_chart</span>
+<h1 class="text-2xl font-bold text-indigo-800 dark:text-indigo-200 font-headline tracking-tight">Wisely</h1>
+</div>
+<button class="hover:opacity-80 transition-opacity active:scale-95 duration-300">
+<span class="material-symbols-outlined text-slate-500" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="relative min-h-screen pt-24 pb-32 px-6 overflow-hidden">
+<!-- Background Organic Blob -->
+<div class="organic-blob absolute -top-20 -right-20 w-80 h-80 animate-pulse"></div>
+<div class="organic-blob absolute top-1/2 -left-20 w-64 h-64 opacity-10"></div>
+<!-- Greeting Section -->
+<section class="mb-10 space-y-2">
+<p class="text-primary font-headline font-semibold text-lg opacity-80">Good morning</p>
+<h2 class="text-4xl md:text-5xl font-headline font-bold text-on-surface leading-[1.1] tracking-tight">
+                how are you <span class="italic font-light">really</span> feeling?
+            </h2>
+</section>
+<!-- Mood Chips Row -->
+<section class="mb-12">
+<div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-6 px-6 mask-fade-right">
+<!-- Happy -->
+<button class="flex-shrink-0 flex items-center gap-2 bg-primary-container text-on-primary-container px-6 py-3 rounded-full font-headline font-semibold shadow-sm hover:scale-105 transition-transform active:scale-95 duration-300">
+<span class="material-symbols-outlined text-xl" data-icon="sentiment_very_satisfied" style="font-variation-settings: 'FILL' 1;">sentiment_very_satisfied</span>
+<span>Happy</span>
+</button>
+<!-- Calm -->
+<button class="flex-shrink-0 flex items-center gap-2 bg-secondary-container text-on-secondary-container px-6 py-3 rounded-full font-headline font-semibold shadow-sm hover:scale-105 transition-transform active:scale-95 duration-300">
+<span class="material-symbols-outlined text-xl" data-icon="self_improvement" style="font-variation-settings: 'FILL' 1;">self_improvement</span>
+<span>Calm</span>
+</button>
+<!-- Motivated -->
+<button class="flex-shrink-0 flex items-center gap-2 bg-surface-container-high text-on-surface px-6 py-3 rounded-full font-headline font-semibold hover:bg-surface-container-highest transition-colors active:scale-95 duration-300">
+<span class="material-symbols-outlined text-xl" data-icon="bolt">bolt</span>
+<span>Motivated</span>
+</button>
+<!-- Love -->
+<button class="flex-shrink-0 flex items-center gap-2 bg-tertiary-container text-on-tertiary-container px-6 py-3 rounded-full font-headline font-semibold shadow-sm hover:scale-105 transition-transform active:scale-95 duration-300">
+<span class="material-symbols-outlined text-xl" data-icon="favorite" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span>Love</span>
+</button>
+<!-- Hopeful -->
+<button class="flex-shrink-0 flex items-center gap-2 bg-surface-container-high text-on-surface px-6 py-3 rounded-full font-headline font-semibold hover:bg-surface-container-highest transition-colors active:scale-95 duration-300">
+<span class="material-symbols-outlined text-xl" data-icon="auto_awesome">auto_awesome</span>
+<span>Hopeful</span>
+</button>
+<!-- Reflective -->
+<button class="flex-shrink-0 flex items-center gap-2 bg-surface-container-high text-on-surface px-6 py-3 rounded-full font-headline font-semibold hover:bg-surface-container-highest transition-colors active:scale-95 duration-300">
+<span class="material-symbols-outlined text-xl" data-icon="psychology">psychology</span>
+<span>Reflective</span>
+</button>
+</div>
+</section>
+<!-- Main Content Area: Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Daily Reflection Card -->
+<div class="col-span-1 md:col-span-2 relative group">
+<div class="absolute -top-6 -right-4 w-24 h-24 bg-primary-container rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+<div class="relative bg-surface-container-lowest p-8 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.03)] overflow-hidden border border-white/40">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="text-xs font-label uppercase tracking-widest text-outline mb-1 block">Featured Activity</span>
+<h3 class="text-2xl font-headline font-bold text-on-surface">Daily Reflection</h3>
+</div>
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="menu_book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+</div>
+</div>
+<p class="text-on-surface-variant leading-relaxed mb-8 max-w-sm">
+                        "Your mind is like water. When it is agitated, it becomes difficult to see. But if you allow it to settle, the answer becomes clear."
+                    </p>
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl font-headline font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+                        Start Session
+                        <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Morning Visualization Bento Item -->
+<div class="bg-surface-container-low p-6 rounded-lg flex flex-col justify-between border border-transparent hover:border-outline-variant/10 transition-colors">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="wb_sunny">wb_sunny</span>
+</div>
+<span class="font-headline font-semibold">Morning Flow</span>
+</div>
+<div class="h-32 rounded-lg mb-4 overflow-hidden bg-white/50">
+<img class="w-full h-full object-cover" data-alt="abstract peaceful morning sunrise with soft orange and blue gradients reflecting over a calm lake surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8AYHY5mTubGzNt6wN2wGJP3iInm_VNvjGwRaFoPvvxzmxu6-ivlHDJW9PBMknvdAIjUY_IZy5aDXRdoTn2kht1xb5Nme4fKESQDG88WLkn_wv91FtmUUuiGmxMLUXt7ihUaH-LhGilBLzH4iAKCJmEj91-wjaW6idZbXxXEj8-ldl_EgFMAO0DxLKSqWSjEqnE7E_o_acLjrsjaHDfc6tkQx7rLQAKSgd-PEb8lt5bg62XFbIr_ePz_PMmADH6iAvoIDdK-aB7BaZ"/>
+</div>
+<p class="text-sm text-on-surface-variant font-medium">A 5-minute guided visual journey to set your intent.</p>
+</div>
+<!-- Sanctuary Stats Bento Item -->
+<div class="bg-surface-container-low p-6 rounded-lg flex flex-col justify-between">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-secondary" data-icon="monitoring">monitoring</span>
+</div>
+<span class="font-headline font-semibold">Weekly Peace</span>
+</div>
+<div class="flex items-end gap-2 h-20 mb-4 px-2">
+<div class="flex-1 bg-secondary-container/40 rounded-t-full h-[40%]"></div>
+<div class="flex-1 bg-secondary-container/60 rounded-t-full h-[60%]"></div>
+<div class="flex-1 bg-secondary-container rounded-t-full h-[90%]"></div>
+<div class="flex-1 bg-secondary-container/50 rounded-t-full h-[50%]"></div>
+<div class="flex-1 bg-secondary-container/30 rounded-t-full h-[30%]"></div>
+</div>
+<p class="text-sm font-label text-on-surface-variant">You've reached your calmest state on Wednesday.</p>
+</div>
+</div>
+<!-- Organic Character floating near bottom -->
+<div class="flex justify-center my-12">
+<div class="w-24 h-24 rounded-full bg-gradient-to-br from-primary-container to-secondary-container shadow-2xl relative animate-bounce" style="animation-duration: 4s; border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;">
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="flex gap-3">
+<div class="w-2 h-2 bg-on-primary-container rounded-full"></div>
+<div class="w-2 h-2 bg-on-primary-container rounded-full"></div>
+</div>
+</div>
+<div class="absolute -bottom-2 w-full flex justify-center">
+<div class="w-8 h-1 bg-on-primary-container/20 rounded-full"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-t-[3rem] shadow-[0_-10px_40px_rgba(92,107,192,0.1)]">
+<!-- Sanctuary (Active) -->
+<a class="flex flex-col items-center justify-center bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-100 rounded-full px-5 py-2 transition-all active:scale-110 duration-500 cubic-bezier(0.34,1.56,0.64,1)" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="spa" style="font-variation-settings: 'FILL' 1;">spa</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider mt-0.5">Sanctuary</span>
+</a>
+<!-- Reflect -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="self_improvement">self_improvement</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider mt-0.5">Reflect</span>
+</a>
+<!-- Explore -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="explore">explore</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider mt-0.5">Explore</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20 rounded-full transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider mt-0.5">Profile</span>
+</a>
+</nav>
+<!-- FAB -->
+<button class="fixed right-6 bottom-32 w-14 h-14 bg-indigo-600 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-40">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+</body></html>

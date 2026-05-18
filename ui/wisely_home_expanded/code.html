@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wisely - Sanctuary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#644000",
+                        "on-primary-fixed": "#3d2500",
+                        "tertiary-fixed-dim": "#ff75a2",
+                        "tertiary-fixed": "#ff8eaf",
+                        "tertiary-container": "#ff8eaf",
+                        "outline": "#757778",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#feb64c",
+                        "on-primary-container": "#583700",
+                        "inverse-on-surface": "#9b9d9e",
+                        "secondary-fixed": "#7fe6db",
+                        "on-tertiary-fixed-variant": "#760038",
+                        "on-secondary-fixed-variant": "#005d57",
+                        "on-surface": "#2c2f30",
+                        "surface-container-low": "#eff1f2",
+                        "error": "#b41340",
+                        "secondary-dim": "#005a54",
+                        "on-primary": "#fff0e2",
+                        "on-surface-variant": "#595c5d",
+                        "surface-dim": "#d1d5d7",
+                        "on-tertiary-container": "#66002f",
+                        "secondary-container": "#7fe6db",
+                        "on-tertiary-fixed": "#380017",
+                        "outline-variant": "#abadae",
+                        "surface-container": "#e6e8ea",
+                        "primary-fixed-dim": "#eea840",
+                        "secondary-fixed-dim": "#71d7cd",
+                        "surface": "#f5f6f7",
+                        "background": "#f5f6f7",
+                        "on-secondary-container": "#00534d",
+                        "primary-fixed": "#feb64c",
+                        "surface-bright": "#f5f6f7",
+                        "surface-variant": "#dadddf",
+                        "on-tertiary": "#ffeff1",
+                        "tertiary-dim": "#971b4e",
+                        "on-error-container": "#510017",
+                        "on-background": "#2c2f30",
+                        "inverse-surface": "#0c0f10",
+                        "surface-tint": "#7f5200",
+                        "primary": "#7f5200",
+                        "inverse-primary": "#feb64c",
+                        "on-secondary-fixed": "#003e39",
+                        "surface-container-high": "#e0e3e4",
+                        "tertiary": "#a7295a",
+                        "primary-dim": "#6f4700",
+                        "secondary": "#006760",
+                        "on-error": "#ffefef",
+                        "on-secondary": "#bffff7",
+                        "error-container": "#f74b6d",
+                        "surface-container-highest": "#dadddf",
+                        "error-dim": "#a70138"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .blob-character {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-transparent backdrop-blur-xl shadow-[0_10px_40px_0_rgba(0,0,0,0.04)]">
+<div class="flex items-center gap-2">
+<span class="text-2xl font-black text-indigo-700 italic font-headline">Wisely</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-indigo-700 font-bold font-headline text-lg tracking-tight hover:bg-slate-100/50 transition-all px-3 py-1 rounded-lg" href="#">Sanctuary</a>
+<a class="text-slate-500 font-headline text-lg tracking-tight hover:bg-slate-100/50 transition-all px-3 py-1 rounded-lg" href="#">Reflect</a>
+<a class="text-slate-500 font-headline text-lg tracking-tight hover:bg-slate-100/50 transition-all px-3 py-1 rounded-lg" href="#">Explore</a>
+<a class="text-slate-500 font-headline text-lg tracking-tight hover:bg-slate-100/50 transition-all px-3 py-1 rounded-lg" href="#">Profile</a>
+</nav>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-all scale-95 active:scale-90 duration-300">
+<span class="material-symbols-outlined text-slate-600">history</span>
+</button>
+<button class="p-2 rounded-full hover:bg-slate-100/50 transition-all scale-95 active:scale-90 duration-300">
+<span class="material-symbols-outlined text-slate-600">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-container">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="close-up portrait of a serene young woman with natural skin and a peaceful expression in soft morning sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiDo6s50LL68XBiqv-FakCRZxYO0x2CEviRWEyY2XOdv6QgEQpfoEzCj_Hst7Mxco1Tm38wnYFsKbKEjpHhkfD3STiOqtHEwvKbCn2-jUAsORhf4oM2Hyg38asNwVVsmz5sQH-EdN0Fwp3vUz7RTqNiqZfxaGgcy0PoZrehVKDPGLtKIozsEX39AM4IGn67qVaS9UjCa-LQTGG-olZFjTl5vqQtwSAdWMHnU_R6awp4gd6vBmqUIztI1TL3ygL1qsRDzlge8EieYoO"/>
+</div>
+</div>
+</header>
+<main class="pt-28 pb-32 px-6 max-w-7xl mx-auto">
+<section class="mb-12 relative">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div class="flex-1 space-y-2">
+<h1 class="text-5xl md:text-7xl font-headline font-extrabold tracking-tighter text-on-surface">
+                        How are we <br/><span class="text-primary italic">feeling</span> right now?
+                    </h1>
+<p class="text-on-surface-variant text-xl max-w-md">Your sanctuary is listening. Select a mood to explore its depth.</p>
+</div>
+<div class="relative group">
+<div class="blob-character w-48 h-48 md:w-64 md:h-64 bg-gradient-to-br from-primary-container to-primary/30 flex items-center justify-center transition-transform duration-700 cubic-bezier(0.34, 1.56, 0.64, 1) hover:scale-105 shadow-2xl shadow-primary/20">
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-on-primary-container text-6xl" style="font-variation-settings: 'FILL' 1;">sentiment_very_satisfied</span>
+<div class="mt-4 flex gap-1">
+<div class="w-2 h-2 rounded-full bg-on-primary-container/40 animate-pulse"></div>
+<div class="w-2 h-2 rounded-full bg-on-primary-container/40 animate-bounce"></div>
+</div>
+</div>
+</div>
+<div class="absolute -top-4 -right-4 bg-surface-container-lowest/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-outline-variant/10">
+<span class="text-sm font-semibold text-primary">Vibrant Confident</span>
+</div>
+</div>
+</div>
+</section>
+<section class="mb-16">
+<div class="flex flex-wrap items-start gap-4">
+<div class="flex flex-col gap-3">
+<button class="flex items-center gap-3 px-8 py-4 bg-primary-container text-on-primary-container rounded-full font-bold text-lg shadow-xl shadow-primary/10 transition-transform scale-105">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sunny</span>
+                        Happy
+                    </button>
+<div class="flex gap-2 p-1 bg-primary-container/20 rounded-full border border-primary-container/10 backdrop-blur-md ml-4 w-fit">
+<button class="flex items-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container rounded-full text-sm font-semibold shadow-sm hover:scale-105 transition-all">
+<span>😎</span> Confident
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary-container/40 text-on-primary-container/70 rounded-full text-sm font-semibold hover:bg-primary-container/60 transition-all">
+<span>🙏</span> Grateful
+                        </button>
+</div>
+</div>
+<button class="flex items-center gap-3 px-8 py-4 bg-secondary-container/40 text-on-secondary-container rounded-full font-semibold text-lg hover:bg-secondary-container/60 transition-all">
+<span class="material-symbols-outlined">filter_drama</span>
+                    Calm
+                </button>
+<button class="flex items-center gap-3 px-8 py-4 bg-tertiary-container/40 text-on-tertiary-container rounded-full font-semibold text-lg hover:bg-tertiary-container/60 transition-all">
+<span class="material-symbols-outlined">favorite</span>
+                    Love
+                </button>
+<button class="flex items-center gap-3 px-8 py-4 bg-surface-container-high text-on-surface-variant rounded-full font-semibold text-lg hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined">add</span>
+                    Custom
+                </button>
+</div>
+</section>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<div class="md:col-span-8 space-y-6">
+<div class="bg-surface-container-low rounded-xl p-8 relative overflow-hidden group border border-outline-variant/5">
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-6">
+<span class="px-4 py-1 bg-primary-container/30 text-on-primary-container text-xs font-bold uppercase tracking-widest rounded-full">Guided Reflection</span>
+<span class="text-on-surface-variant font-medium">12 mins</span>
+</div>
+<h3 class="text-3xl font-headline font-bold text-on-surface mb-4 leading-tight">Stepping into your <br/>highest confidence.</h3>
+<p class="text-on-surface-variant mb-8 max-w-sm">A sensory journey designed to anchor your current state of bold clarity.</p>
+<button class="px-8 py-3 bg-primary text-on-primary rounded-full font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">Start Session</button>
+</div>
+<div class="absolute top-0 right-0 w-1/2 h-full hidden md:block">
+<img class="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000" data-alt="majestic sunlit mountain peak with soft golden clouds and a sense of vast achievement and perspective" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPohv3hv7mjGV60KZwWH3ovcEMW5ewhsnRyhKMChxcg-Pzv4dO2fk_OQcfgq56flv-0tRlLF8dX3wOc69rsXYxA-stl1wSLDnw-3JOPy24rifo3JkiBCKSU8CdlgESqzJrah8JM1prDj-ezgyCKk4kf8zMgoTl0NUWLC7QgqYPRvaGRPHXF62KuvshF-8TjpqKk2zW2MH3lS1Bs4pzsonpgEBVd19JyJW5UsZJGn8rS344NA49pkLD-KcKuMIYWpjMZSO0f0zU-oG4"/>
+<div class="absolute inset-0 bg-gradient-to-r from-surface-container-low via-surface-container-low/80 to-transparent"></div>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10 hover:shadow-xl transition-all">
+<div class="w-12 h-12 bg-secondary-container/30 rounded-lg flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-secondary">music_note</span>
+</div>
+<h4 class="font-headline font-bold text-lg mb-2">Confidence Beats</h4>
+<p class="text-sm text-on-surface-variant">Uplifting rhythms to maintain your current flow.</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm border border-outline-variant/10 hover:shadow-xl transition-all">
+<div class="w-12 h-12 bg-tertiary-container/30 rounded-lg flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-tertiary">history_edu</span>
+</div>
+<h4 class="font-headline font-bold text-lg mb-2">Gratitude Log</h4>
+<p class="text-sm text-on-surface-variant">Record what fueled your fire today.</p>
+</div>
+</div>
+</div>
+<div class="md:col-span-4 bg-primary/5 rounded-xl p-8 border border-primary/10 backdrop-blur-sm">
+<h3 class="text-xl font-headline font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                    Mood Insights
+                </h3>
+<div class="space-y-8">
+<div class="relative pt-1">
+<div class="flex mb-2 items-center justify-between">
+<div><span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary bg-primary-container/20">Self-Assurance</span></div>
+<div class="text-right"><span class="text-xs font-bold inline-block text-primary">85%</span></div>
+</div>
+<div class="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-primary-container/20">
+<div class="shadow-none flex flex-col text-center white-space-nowrap text-white justify-center bg-primary rounded-full" style="width:85%"></div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-lowest rounded-lg border border-primary/10">
+<p class="text-sm italic text-on-surface-variant leading-relaxed">"You are currently in a high-energy peak. This is an excellent time for complex decision making."</p>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-2 h-12 bg-primary rounded-full"></div>
+<div>
+<div class="text-xs font-bold text-on-surface-variant uppercase">Streak</div>
+<div class="text-2xl font-black font-headline text-on-surface">4 Days Happy</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 backdrop-blur-2xl shadow-[0_-10px_40px_0_rgba(0,0,0,0.04)] rounded-t-[3rem]">
+<a class="flex flex-col items-center justify-center bg-indigo-50 text-indigo-700 rounded-full px-6 py-2 cubic-bezier(0.34, 1.56, 0.64, 1) hover:scale-110" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">spa</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mt-1">Sanctuary</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 px-6 py-2 hover:text-indigo-500 transition-colors" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mt-1">Reflect</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 px-6 py-2 hover:text-indigo-500 transition-colors" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 px-6 py-2 hover:text-indigo-500 transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

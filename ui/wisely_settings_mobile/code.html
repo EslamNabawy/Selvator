@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, .font-headline {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#ff75a2",
+                    "on-tertiary": "#ffeff1",
+                    "on-primary-fixed": "#3d2500",
+                    "inverse-surface": "#0c0f10",
+                    "error-container": "#f74b6d",
+                    "secondary-fixed-dim": "#71d7cd",
+                    "tertiary": "#a7295a",
+                    "primary-fixed-dim": "#eea840",
+                    "primary-dim": "#6f4700",
+                    "surface-tint": "#7f5200",
+                    "on-secondary": "#bffff7",
+                    "secondary-dim": "#005a54",
+                    "on-error": "#ffefef",
+                    "on-error-container": "#510017",
+                    "surface-dim": "#d1d5d7",
+                    "surface-container-high": "#e0e3e4",
+                    "on-tertiary-fixed": "#380017",
+                    "on-secondary-container": "#00534d",
+                    "on-secondary-fixed": "#003e39",
+                    "background": "#f5f6f7",
+                    "outline-variant": "#abadae",
+                    "surface-container-highest": "#dadddf",
+                    "error": "#b41340",
+                    "tertiary-container": "#ff8eaf",
+                    "on-primary": "#fff0e2",
+                    "on-background": "#2c2f30",
+                    "on-secondary-fixed-variant": "#005d57",
+                    "inverse-on-surface": "#9b9d9e",
+                    "primary": "#7f5200",
+                    "on-surface-variant": "#595c5d",
+                    "secondary-fixed": "#7fe6db",
+                    "secondary-container": "#7fe6db",
+                    "surface": "#f5f6f7",
+                    "on-tertiary-fixed-variant": "#760038",
+                    "tertiary-fixed": "#ff8eaf",
+                    "secondary": "#006760",
+                    "on-tertiary-container": "#66002f",
+                    "outline": "#757778",
+                    "on-surface": "#2c2f30",
+                    "primary-container": "#feb64c",
+                    "error-dim": "#a70138",
+                    "on-primary-container": "#583700",
+                    "surface-variant": "#dadddf",
+                    "on-primary-fixed-variant": "#644000",
+                    "inverse-primary": "#feb64c",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#eff1f2",
+                    "tertiary-dim": "#971b4e",
+                    "primary-fixed": "#feb64c",
+                    "surface-container": "#e6e8ea",
+                    "surface-bright": "#f5f6f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.04)]">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-indigo-700 dark:text-indigo-300" data-icon="bubble_chart">bubble_chart</span>
+<h1 class="text-2xl font-bold text-indigo-800 dark:text-indigo-200 font-['Plus_Jakarta_Sans'] tracking-tight">Wisely</h1>
+</div>
+<button class="text-indigo-700 hover:opacity-80 transition-opacity active:scale-95 duration-300">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="pt-24 px-6 max-w-md mx-auto">
+<!-- Header Section -->
+<section class="mb-10">
+<h2 class="text-[1.75rem] font-bold text-on-surface mb-2 font-headline">Settings</h2>
+<p class="text-on-surface-variant body-lg">Refine your sanctuary experience.</p>
+</section>
+<!-- Profile Section -->
+<section class="mb-8">
+<div class="bg-surface-container-low rounded-lg p-6 flex items-center gap-4 relative overflow-hidden">
+<!-- Blob Background Glow -->
+<div class="absolute -right-10 -top-10 w-32 h-32 bg-primary-container opacity-20 blur-3xl rounded-full"></div>
+<div class="relative">
+<img alt="Profile" class="w-16 h-16 rounded-full object-cover border-2 border-surface-container-lowest" data-alt="portrait of a calm woman with a gentle smile in soft natural morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCs327ceuG7qENLDvmx_fw5DH4HiTVJVevd4h18jjf8MUzrid-v6tq5wXzl8yI38BvIQ_d9rKClnx_L0OeBGH_XUdoDnVw_bQ2B0fvjHRL_v0umORM2ldtIZ7TOq6BxbngU_QjHFCPdjP2Cj1bC-AHcY49gFi17dYSpEutVVlHesszsuKtaqm88D787BeJJXdDdyuk4Fo_6MhHJ6Sd3NWk3xOb9kV1VO51NXX3UHCbSVcon12E0BNDO_6zzw12bqU3v_2X8l8_4xHpu"/>
+<div class="absolute -bottom-1 -right-1 bg-secondary-container p-1 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-[14px] text-on-secondary-container" data-icon="edit" data-weight="fill" style="font-variation-settings: 'FILL' 1;">edit</span>
+</div>
+</div>
+<div>
+<h3 class="text-title-lg font-semibold text-on-surface">Alex Rivera</h3>
+<p class="text-label-md text-on-surface-variant">alex.sanctuary@wisely.me</p>
+</div>
+</div>
+</section>
+<!-- Main Settings List -->
+<div class="space-y-4">
+<!-- Notifications Section -->
+<div class="space-y-2">
+<span class="text-label-md uppercase tracking-widest text-on-surface-variant font-semibold px-2">Notifications</span>
+<div class="bg-surface-container-low rounded-lg overflow-hidden">
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="notifications">notifications</span>
+<span class="font-medium">Push Notifications</span>
+</div>
+<div class="w-12 h-6 bg-secondary-container rounded-full relative p-1">
+<div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary" data-icon="schedule">schedule</span>
+<span class="font-medium">Quiet Hours</span>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Mood Engine Section -->
+<div class="space-y-2">
+<span class="text-label-md uppercase tracking-widest text-on-surface-variant font-semibold px-2">Mood Engine</span>
+<div class="bg-surface-container-low rounded-lg p-4 space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="psychology">psychology</span>
+<span class="font-medium">Mood Detail Level</span>
+</div>
+</div>
+<!-- Segmented Control -->
+<div class="bg-surface-container-highest p-1 rounded-xl flex">
+<button class="flex-1 py-2 text-label-md font-semibold text-on-surface-variant rounded-lg transition-all">
+                            Simple
+                        </button>
+<button class="flex-1 py-2 text-label-md font-semibold bg-surface-container-lowest text-primary shadow-sm rounded-lg transition-all">
+                            Detailed
+                        </button>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-medium">Auto-Reflect</span>
+</div>
+<div class="w-12 h-6 bg-outline-variant/20 rounded-full relative p-1">
+<div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Account & Security Section -->
+<div class="space-y-2">
+<span class="text-label-md uppercase tracking-widest text-on-surface-variant font-semibold px-2">Account &amp; Security</span>
+<div class="bg-surface-container-low rounded-lg overflow-hidden">
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="lock">lock</span>
+<span class="font-medium">Change Password</span>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="shield">shield</span>
+<span class="font-medium">Privacy Center</span>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-error" data-icon="logout">logout</span>
+<span class="font-medium text-error">Sign Out</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Support Card -->
+<div class="mt-8 p-6 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-lg text-white relative overflow-hidden shadow-xl">
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 blur-2xl rounded-full"></div>
+<h4 class="font-headline font-bold text-xl mb-2">Need help?</h4>
+<p class="text-indigo-100 text-sm mb-4">Our guides are here to help you find your center.</p>
+<button class="bg-white text-indigo-700 font-semibold px-6 py-2 rounded-full text-sm active:scale-95 transition-transform">
+                Contact Guide
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl shadow-[0_-10px_40px_rgba(92,107,192,0.1)] rounded-t-[3rem]">
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20">
+<span class="material-symbols-outlined" data-icon="spa">spa</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider">Sanctuary</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20">
+<span class="material-symbols-outlined" data-icon="self_improvement">self_improvement</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider">Reflect</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-100 rounded-full px-5 py-2 transition-all scale-110 duration-500 cubic-bezier(0.34,1.56,0.64,1)">
+<span class="material-symbols-outlined" data-icon="person" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider">Profile</span>
+</div>
+</nav>
+</body></html>

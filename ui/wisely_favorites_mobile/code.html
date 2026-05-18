@@ -1,0 +1,238 @@
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed-dim": "#ff75a2",
+            "on-tertiary": "#ffeff1",
+            "on-primary-fixed": "#3d2500",
+            "inverse-surface": "#0c0f10",
+            "error-container": "#f74b6d",
+            "secondary-fixed-dim": "#71d7cd",
+            "tertiary": "#a7295a",
+            "primary-fixed-dim": "#eea840",
+            "primary-dim": "#6f4700",
+            "surface-tint": "#7f5200",
+            "on-secondary": "#bffff7",
+            "secondary-dim": "#005a54",
+            "on-error": "#ffefef",
+            "on-error-container": "#510017",
+            "surface-dim": "#d1d5d7",
+            "surface-container-high": "#e0e3e4",
+            "on-tertiary-fixed": "#380017",
+            "on-secondary-container": "#00534d",
+            "on-secondary-fixed": "#003e39",
+            "background": "#f5f6f7",
+            "outline-variant": "#abadae",
+            "surface-container-highest": "#dadddf",
+            "error": "#b41340",
+            "tertiary-container": "#ff8eaf",
+            "on-primary": "#fff0e2",
+            "on-background": "#2c2f30",
+            "on-secondary-fixed-variant": "#005d57",
+            "inverse-on-surface": "#9b9d9e",
+            "primary": "#7f5200",
+            "on-surface-variant": "#595c5d",
+            "secondary-fixed": "#7fe6db",
+            "secondary-container": "#7fe6db",
+            "surface": "#f5f6f7",
+            "on-tertiary-fixed-variant": "#760038",
+            "tertiary-fixed": "#ff8eaf",
+            "secondary": "#006760",
+            "on-tertiary-container": "#66002f",
+            "outline": "#757778",
+            "on-surface": "#2c2f30",
+            "primary-container": "#feb64c",
+            "error-dim": "#a70138",
+            "on-primary-container": "#583700",
+            "surface-variant": "#dadddf",
+            "on-primary-fixed-variant": "#644000",
+            "inverse-primary": "#feb64c",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#eff1f2",
+            "tertiary-dim": "#971b4e",
+            "primary-fixed": "#feb64c",
+            "surface-container": "#e6e8ea",
+            "surface-bright": "#f5f6f7"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "fontFamily": {
+            "headline": ["Plus Jakarta Sans"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .glass-card {
+      backdrop-filter: blur(24px);
+      background: rgba(255, 255, 255, 0.4);
+    }
+    .organic-bounce:active {
+      transform: scale(0.95);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl shadow-[0_10px_40px_rgba(0,0,0,0.04)]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-700 dark:text-indigo-300" data-icon="bubble_chart">bubble_chart</span>
+<h1 class="text-2xl font-bold text-indigo-800 dark:text-indigo-200 font-headline tracking-tight">Wisely</h1>
+</div>
+<button class="material-symbols-outlined text-indigo-700 dark:text-indigo-300 hover:opacity-80 transition-opacity" data-icon="settings">settings</button>
+</header>
+<main class="pt-24 pb-32 px-6">
+<!-- Hero Section -->
+<section class="mb-8">
+<h2 class="text-[1.75rem] font-headline font-semibold text-on-surface mb-2">Sacred Insights</h2>
+<p class="text-on-surface-variant font-body">Your collection of filtered wisdom and stillness.</p>
+</section>
+<!-- Main Mood Filter (Primary) -->
+<section class="mb-6 -mx-6">
+<div class="flex overflow-x-auto no-scrollbar gap-4 px-6 py-2">
+<!-- Active: Calm -->
+<button class="flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-xl bg-secondary-container text-on-secondary-container shadow-sm organic-bounce">
+<span class="material-symbols-outlined text-3xl" data-icon="water_drop" style="font-variation-settings: 'FILL' 1;">water_drop</span>
+<span class="text-[11px] font-label font-semibold uppercase tracking-wider">Calm</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-xl bg-surface-container-low text-on-surface-variant organic-bounce">
+<span class="material-symbols-outlined text-3xl" data-icon="wb_sunny">wb_sunny</span>
+<span class="text-[11px] font-label font-semibold uppercase tracking-wider">Happy</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-xl bg-surface-container-low text-on-surface-variant organic-bounce">
+<span class="material-symbols-outlined text-3xl" data-icon="favorite">favorite</span>
+<span class="text-[11px] font-label font-semibold uppercase tracking-wider">Love</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-xl bg-surface-container-low text-on-surface-variant organic-bounce">
+<span class="material-symbols-outlined text-3xl" data-icon="bedtime">bedtime</span>
+<span class="text-[11px] font-label font-semibold uppercase tracking-wider">Sleep</span>
+</button>
+<button class="flex-shrink-0 flex flex-col items-center gap-2 p-4 rounded-xl bg-surface-container-low text-on-surface-variant organic-bounce">
+<span class="material-symbols-outlined text-3xl" data-icon="psychology">psychology</span>
+<span class="text-[11px] font-label font-semibold uppercase tracking-wider">Focus</span>
+</button>
+</div>
+</section>
+<!-- Sub-mood Chips (Secondary) -->
+<section class="mb-8">
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-full bg-secondary text-on-secondary text-[13px] font-medium flex items-center gap-2 organic-bounce">
+          Nature Sounds
+          <span class="material-symbols-outlined text-sm" data-icon="close">close</span>
+</button>
+<button class="px-4 py-2 rounded-full bg-secondary/20 text-secondary text-[13px] font-medium organic-bounce">
+          Deep Focus
+        </button>
+<button class="px-4 py-2 rounded-full bg-secondary/20 text-secondary text-[13px] font-medium organic-bounce">
+          Breathwork
+        </button>
+<button class="px-4 py-2 rounded-full bg-secondary/20 text-secondary text-[13px] font-medium organic-bounce">
+          Forest Walk
+        </button>
+</div>
+</section>
+<!-- Content Masonry-ish Grid -->
+<section class="grid grid-cols-2 gap-4">
+<!-- Large Atmospheric Card -->
+<div class="col-span-2 relative overflow-hidden rounded-lg h-64 shadow-sm group">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="misty morning in a redwood forest with soft sunlight filtering through the dense canopy and ferns in the foreground" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAENvHe8qW38RgworsQ6L6tgX8dT2COFiKgVvTiz25iaaTNAwiDkLkBToYJ2a_gQhTVPHZLw-17CHZl5P_UazQ6V567nKYizRDSJtUSdqKo03IcvN61nsxIwjv-hMfzZ9GYhZ1Y-xdINwVZqRhh8J-0pImlYuYlKMWtyGZLzhVpLkCiXdGHdMX-iwyazBuV1PLvUVMQbPze6mSDLpEkeiBZwG5Oo7Y9-sH7bo_N_c1Yo7OZ5Sj75rcTCn6gkIhurhj9n3GSMKdc8ryD"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4">
+<span class="text-[10px] font-label font-bold text-white/80 uppercase tracking-[0.2em] mb-1 block">Atmospheric Soundscape</span>
+<h3 class="text-xl font-headline font-bold text-white leading-tight">Redwood Resonance</h3>
+</div>
+<button class="absolute top-4 right-4 bg-white/20 backdrop-blur-md p-2 rounded-full text-white organic-bounce">
+<span class="material-symbols-outlined" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+<!-- Quote Card (Asymmetric) -->
+<div class="col-span-1 bg-surface-container-lowest p-6 rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.02)] flex flex-col justify-between min-h-[220px]">
+<span class="material-symbols-outlined text-secondary mb-4" data-icon="format_quote" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+<p class="text-sm font-body italic text-on-surface leading-relaxed">The quieter you become, the more you are able to hear.</p>
+<div class="mt-4">
+<p class="text-[10px] font-label font-bold text-on-surface-variant uppercase">Rumi</p>
+</div>
+</div>
+<!-- Vertical Image Card -->
+<div class="col-span-1 relative overflow-hidden rounded-lg min-h-[220px] shadow-sm">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="macro view of ink swirling in water in soft shades of teal and indigo create a dreamy abstract pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFbTzBgnAFGeAmx0jc3DgYEBEBgkX8SASUU0wab7cid67n1TV1Wue8YlL3kAWpSftIdyo7dKVtL71Kv1aONJN6mz0r-86ZyfGM0mmKNskKz66IAJP16SIV7iwQwJ_NBTrxI7XrZBR25ka62rI24q8PteRlCfES6Y3oNnuHbG26H8eejiO7hez0MzuDbFWpnhJEuIcevXP_lAebJO3APcHAdGLlKcBMj54fu0NBKra4OupWJTl1KacDIttIgikg4f1NRBKheNxSEecg"/>
+<div class="absolute inset-0 bg-secondary/20 backdrop-blur-[2px]"></div>
+<div class="absolute inset-0 p-5 flex flex-col justify-end">
+<h3 class="text-lg font-headline font-bold text-white">Flow State</h3>
+</div>
+</div>
+<!-- Insight Card -->
+<div class="col-span-2 bg-surface-container-low p-6 rounded-lg flex items-center gap-4 border-l-4 border-secondary">
+<div class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="spa">spa</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">Daily Practice</h4>
+<p class="text-sm text-on-surface-variant">5 minutes of box breathing can reset your nervous system.</p>
+</div>
+</div>
+<!-- Mini Graphic Card -->
+<div class="col-span-1 overflow-hidden rounded-lg h-40 bg-gradient-to-br from-secondary/30 to-secondary-container/40 p-4 flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-secondary text-4xl mb-2" data-icon="air">air</span>
+<span class="text-xs font-label font-bold text-on-secondary-fixed-variant uppercase">Pure Air</span>
+</div>
+<!-- Floating Character Interaction -->
+<div class="col-span-1 relative bg-white/60 backdrop-blur-xl p-4 rounded-lg flex flex-col items-center justify-center border border-white/50">
+<div class="w-14 h-14 bg-secondary-container rounded-full flex items-center justify-center mb-2 shadow-inner organic-bounce cursor-pointer overflow-hidden">
+<!-- The Blob Character Icon placeholder -->
+<div class="w-full h-full bg-gradient-to-tr from-secondary to-secondary-container rounded-full opacity-80 flex items-center justify-center">
+<span class="material-symbols-outlined text-white" data-icon="face">face</span>
+</div>
+</div>
+<span class="text-[10px] font-label font-semibold text-secondary uppercase tracking-tighter">Your Guide</span>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-t-[3rem] shadow-[0_-10px_40px_rgba(92,107,192,0.1)]">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20" href="#">
+<span class="material-symbols-outlined" data-icon="spa">spa</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider mt-1">Sanctuary</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20" href="#">
+<span class="material-symbols-outlined" data-icon="self_improvement">self_improvement</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider mt-1">Reflect</span>
+</a>
+<!-- Active: Explore -->
+<a class="flex flex-col items-center justify-center bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-100 rounded-full px-5 py-2 transition-all scale-110" href="#">
+<span class="material-symbols-outlined" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:bg-indigo-50/50 dark:hover:bg-indigo-900/20" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Inter'] text-[11px] font-medium uppercase tracking-wider mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

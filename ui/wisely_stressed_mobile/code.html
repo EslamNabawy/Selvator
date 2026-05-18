@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wisely - Sanctuary</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#ff75a2",
+                    "on-tertiary": "#ffeff1",
+                    "on-primary-fixed": "#3d2500",
+                    "inverse-surface": "#0c0f10",
+                    "error-container": "#f74b6d",
+                    "secondary-fixed-dim": "#71d7cd",
+                    "tertiary": "#a7295a",
+                    "primary-fixed-dim": "#eea840",
+                    "primary-dim": "#6f4700",
+                    "surface-tint": "#7f5200",
+                    "on-secondary": "#bffff7",
+                    "secondary-dim": "#005a54",
+                    "on-error": "#ffefef",
+                    "on-error-container": "#510017",
+                    "surface-dim": "#d1d5d7",
+                    "surface-container-high": "#e0e3e4",
+                    "on-tertiary-fixed": "#380017",
+                    "on-secondary-container": "#00534d",
+                    "on-secondary-fixed": "#003e39",
+                    "background": "#f5f6f7",
+                    "outline-variant": "#abadae",
+                    "surface-container-highest": "#dadddf",
+                    "error": "#b41340",
+                    "tertiary-container": "#ff8eaf",
+                    "on-primary": "#fff0e2",
+                    "on-background": "#2c2f30",
+                    "on-secondary-fixed-variant": "#005d57",
+                    "inverse-on-surface": "#9b9d9e",
+                    "primary": "#7f5200",
+                    "on-surface-variant": "#595c5d",
+                    "secondary-fixed": "#7fe6db",
+                    "secondary-container": "#7fe6db",
+                    "surface": "#f5f6f7",
+                    "on-tertiary-fixed-variant": "#760038",
+                    "tertiary-fixed": "#ff8eaf",
+                    "secondary": "#006760",
+                    "on-tertiary-container": "#66002f",
+                    "outline": "#757778",
+                    "on-surface": "#2c2f30",
+                    "primary-container": "#feb64c",
+                    "error-dim": "#a70138",
+                    "on-primary-container": "#583700",
+                    "surface-variant": "#dadddf",
+                    "on-primary-fixed-variant": "#644000",
+                    "inverse-primary": "#feb64c",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#eff1f2",
+                    "tertiary-dim": "#971b4e",
+                    "primary-fixed": "#feb64c",
+                    "surface-container": "#e6e8ea",
+                    "surface-bright": "#f5f6f7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .blob-mesh {
+            background-image: radial-gradient(circle at 20% 30%, #7fe6db 0%, transparent 50%),
+                              radial-gradient(circle at 80% 70%, #006760 0%, transparent 50%),
+                              radial-gradient(circle at 50% 50%, #ffffff 0%, transparent 70%);
+            filter: blur(40px);
+        }
+        .jitter-path {
+            stroke-dasharray: 4;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface overflow-hidden">
+<!-- Top Navigation Anchor (Suppressed standard TopAppBar for focused task) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4">
+<button class="w-10 h-10 flex items-center justify-center bg-surface-container-low/60 backdrop-blur-lg rounded-full text-secondary hover:opacity-80 transition-opacity active:scale-95 duration-300">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="font-headline font-semibold tracking-tight text-secondary-dim text-lg">Wisely Sanctuary</div>
+<div class="w-10"></div> <!-- Spacer for symmetry -->
+</header>
+<!-- Main Content Canvas -->
+<main class="relative h-screen w-full flex flex-col items-center justify-center px-6 overflow-hidden">
+<!-- Background Atmospheric Layer -->
+<div class="absolute inset-0 z-0 bg-secondary-container/20">
+<div class="absolute top-1/4 left-1/4 w-[150%] h-[150%] blob-mesh opacity-30 transform -translate-x-1/2 -translate-y-1/2 rotate-12"></div>
+</div>
+<!-- The Organic Character (The Stressed Blob) -->
+<div class="relative z-20 mb-[-4rem] transition-all duration-700">
+<!-- Asymmetric Jittery Character Body -->
+<div class="w-48 h-48 bg-secondary-container rounded-[2.5rem_4rem_3rem_5rem] shadow-[0_20px_50px_rgba(0,103,96,0.15)] flex items-center justify-center relative overflow-visible border-4 border-white/20">
+<!-- Tangled/Jittery Visuals (Simplified as Vector) -->
+<svg class="absolute inset-0 w-full h-full opacity-40" viewbox="0 0 100 100">
+<path class="jitter-path" d="M20,50 C20,20 80,20 80,50 C80,80 20,80 20,50" fill="none" stroke="#00534d" stroke-width="2"></path>
+<path d="M30,40 C35,35 45,35 50,40 C55,45 65,45 70,40" fill="none" stroke="#00534d" stroke-width="1.5"></path>
+</svg>
+<!-- Expressive Eyes -->
+<div class="flex gap-4">
+<div class="w-4 h-5 bg-on-secondary-container rounded-full flex flex-col items-center justify-start pt-1">
+<div class="w-2 h-1 bg-white/40 rounded-full"></div>
+</div>
+<div class="w-4 h-5 bg-on-secondary-container rounded-full flex flex-col items-center justify-start pt-1">
+<div class="w-2 h-1 bg-white/40 rounded-full"></div>
+</div>
+</div>
+<!-- Subtle Tonal Glow -->
+<div class="absolute inset-0 bg-gradient-to-tr from-secondary/20 to-transparent rounded-full pointer-events-none"></div>
+</div>
+<!-- Character "Tension" Lines -->
+<div class="absolute -top-4 -right-2 text-secondary/40 select-none">
+<span class="material-symbols-outlined text-4xl" data-icon="air">air</span>
+</div>
+</div>
+<!-- Translucent Glass Quote Card -->
+<div class="relative z-10 w-full max-w-md bg-white/40 backdrop-blur-3xl rounded-xl p-10 flex flex-col items-center text-center shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-white/40">
+<!-- Mood Badge -->
+<div class="mb-8 flex flex-col items-center gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] font-label">Stressed</span>
+<div class="w-8 h-1 bg-secondary-container/40 rounded-full"></div>
+</div>
+<!-- The Quote -->
+<h1 class="font-headline text-[2rem] leading-tight font-bold text-on-surface mb-6 tracking-tight">
+                Take a deep breath. <br/>
+<span class="text-secondary italic font-medium">This too shall pass.</span>
+</h1>
+<p class="font-body text-on-surface-variant text-base mb-10 max-w-[280px] leading-relaxed">
+                Allow the weight of the day to dissipate with each exhale. You are safe in this sanctuary.
+            </p>
+<!-- Primary Action Button -->
+<button class="w-full bg-gradient-to-r from-secondary to-secondary-dim text-on-secondary py-5 px-8 rounded-xl font-headline font-bold text-lg hover:opacity-90 active:scale-95 transition-all duration-300 shadow-xl shadow-secondary/20 flex items-center justify-center gap-3">
+<span class="material-symbols-outlined" data-icon="self_improvement">self_improvement</span>
+                Rest in this moment
+            </button>
+</div>
+<!-- Decorative Mood Bleed -->
+<div class="absolute bottom-[-10%] right-[-10%] w-64 h-64 bg-secondary-container rounded-full blur-[80px] opacity-40"></div>
+<div class="absolute top-[10%] left-[-10%] w-48 h-48 bg-primary-container rounded-full blur-[100px] opacity-20"></div>
+</main>
+<!-- Bottom Navigation Shell (Suppressed for focused detail view) -->
+<!-- Not rendering BottomNavBar or SideNav as per "Focused journey/Task-focused" suppression rule -->
+<!-- Ambient Texture Layer -->
+<div class="fixed inset-0 pointer-events-none opacity-[0.03] z-[100]" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA5811l1LZXS6cUNNqfJsP4WoNiVGmssjgNL1eFQq-2I4Xu0SgoRc6IcFNXFCt0e8d2MYQxFDtUaNAbztPQwf3uOZroE5MSwuH3mXCBe3Cr7_PFWxrPcnJBBZ3nAnJaZ0rJYFzgF4MNhTP_N9zJQDxQZIGW7_QwQi1zVFl_pi3JaXKt4cTJEMTcLf5x3_5JCvNiqxypP1JTbZUCBtJwjQCRvLenIXaN8lEAsdETRGajU7jq9c84rFy0rcs2GtzQg1MhWj787elPNMTY');"></div>
+<!-- Hidden Image Data Alts for System -->
+<div class="hidden">
+<img data-alt="abstract fluid shape with soft teal and emerald green gradients shifting smoothly with organic curves and light grain texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMG5AVrmAfC97TvximGuY_r-PN8hpi9ObOsvbsqKXJ3YQyZxF70kqgrG5v5943po-r-vCrUOk6z-LNbfjmkARVfmItjiIcOvICqCZVJCgSDDZJebXYLMGL7XO9tmTHjNSIXnoDdUSgJQ4hsDMceHlgLkYJaduNJiYpg4c3ERUgeNtlfMp_gzJosqAvt147GT-5PzbPggq4aDYj5WFVpKUQdEhEePBTqvghpVQe9hCOJAuj3g_zk9SfW4FUQfUy2D97B21KkSaQjq5E"/>
+</div>
+</body></html>

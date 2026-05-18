@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wisely - Reflection Sanctuary</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed-variant": "#644000",
+                    "on-primary-fixed": "#3d2500",
+                    "tertiary-fixed-dim": "#ff75a2",
+                    "tertiary-fixed": "#ff8eaf",
+                    "tertiary-container": "#ff8eaf",
+                    "outline": "#757778",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#feb64c",
+                    "on-primary-container": "#583700",
+                    "inverse-on-surface": "#9b9d9e",
+                    "secondary-fixed": "#7fe6db",
+                    "on-tertiary-fixed-variant": "#760038",
+                    "on-secondary-fixed-variant": "#005d57",
+                    "on-surface": "#2c2f30",
+                    "surface-container-low": "#eff1f2",
+                    "error": "#b41340",
+                    "secondary-dim": "#005a54",
+                    "on-primary": "#fff0e2",
+                    "on-surface-variant": "#595c5d",
+                    "surface-dim": "#d1d5d7",
+                    "on-tertiary-container": "#66002f",
+                    "secondary-container": "#7fe6db",
+                    "on-tertiary-fixed": "#380017",
+                    "outline-variant": "#abadae",
+                    "surface-container": "#e6e8ea",
+                    "primary-fixed-dim": "#eea840",
+                    "secondary-fixed-dim": "#71d7cd",
+                    "surface": "#f5f6f7",
+                    "background": "#f5f6f7",
+                    "on-secondary-container": "#00534d",
+                    "primary-fixed": "#feb64c",
+                    "surface-bright": "#f5f6f7",
+                    "surface-variant": "#dadddf",
+                    "on-tertiary": "#ffeff1",
+                    "tertiary-dim": "#971b4e",
+                    "on-error-container": "#510017",
+                    "on-background": "#2c2f30",
+                    "inverse-surface": "#0c0f10",
+                    "surface-tint": "#7f5200",
+                    "primary": "#7f5200",
+                    "inverse-primary": "#feb64c",
+                    "on-secondary-fixed": "#003e39",
+                    "surface-container-high": "#e0e3e4",
+                    "tertiary": "#a7295a",
+                    "primary-dim": "#6f4700",
+                    "secondary": "#006760",
+                    "on-error": "#ffefef",
+                    "on-secondary": "#bffff7",
+                    "error-container": "#f74b6d",
+                    "surface-container-highest": "#dadddf",
+                    "error-dim": "#a70138"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .organic-shape {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+        }
+        .blob-texture {
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface min-h-screen flex flex-col overflow-x-hidden">
+<!-- Top Navigation (Shell suppressed for transaction focus, replaced with custom Back action) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-8">
+<button class="group flex items-center gap-3 text-secondary-dim hover:text-secondary transition-all active:scale-95">
+<div class="w-12 h-12 flex items-center justify-center bg-white/40 backdrop-blur-xl rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.04)] group-hover:bg-white/80 transition-colors">
+<span class="material-symbols-outlined text-[20px]">arrow_back_ios_new</span>
+</div>
+<span class="font-bold text-sm uppercase tracking-[0.2em] font-label">Sanctuary</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="text-xs font-bold text-on-surface-variant font-label uppercase tracking-widest">Atmosphere: Dimmed</span>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center px-6 py-24 relative">
+<!-- Environmental Background Blobs -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+<div class="absolute -top-[10%] -left-[5%] w-[60vw] h-[60vw] bg-secondary-container/20 blur-[120px] organic-shape"></div>
+<div class="absolute bottom-[0%] right-[0%] w-[50vw] h-[50vw] bg-primary-container/10 blur-[100px] organic-shape"></div>
+</div>
+<!-- Focused Quote Canvas -->
+<div class="relative w-full max-w-2xl z-10">
+<!-- The Character (Tangled/Stressed State) -->
+<div class="absolute -top-24 left-1/2 -translate-x-1/2 z-20">
+<div class="relative w-48 h-48">
+<!-- The Main Blob -->
+<div class="absolute inset-0 bg-secondary-dim/40 backdrop-blur-md organic-shape shadow-[inset_0_-10px_20px_rgba(0,0,0,0.1)] border border-white/20 animate-pulse blob-texture"></div>
+<!-- Tangled Expression Elements (Stylized) -->
+<div class="absolute inset-0 flex flex-col items-center justify-center gap-2">
+<div class="flex gap-4">
+<!-- Eyes -->
+<div class="w-3 h-1 bg-on-secondary-container/40 rounded-full rotate-12"></div>
+<div class="w-3 h-1 bg-on-secondary-container/40 rounded-full -rotate-12"></div>
+</div>
+<!-- Tangled "arms" icon representing overwhelm -->
+<span class="material-symbols-outlined text-on-secondary-container/30 text-4xl mt-2 select-none">texture</span>
+</div>
+</div>
+</div>
+<!-- The Quote Card -->
+<div class="bg-white/40 backdrop-blur-[60px] rounded-xl p-12 md:p-20 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.06)] border border-white/40 flex flex-col items-center text-center">
+<!-- Sub-mood Indicator -->
+<div class="mb-12 flex items-center gap-3 bg-secondary-container/40 px-5 py-2 rounded-full">
+<span class="text-lg">😰</span>
+<span class="font-label text-[10px] font-extrabold uppercase tracking-[0.25em] text-on-secondary-container/70">Stressed nuance</span>
+</div>
+<!-- The Quote -->
+<h1 class="font-headline text-3xl md:text-5xl font-bold text-on-surface leading-tight tracking-tight mb-8">
+                    "Take a deep breath. <br/> <span class="text-secondary-dim/60 italic font-medium">This too shall pass.</span>"
+                </h1>
+<!-- Visual Accent -->
+<div class="w-12 h-[2px] bg-secondary-container mb-12"></div>
+<!-- Personality Layer -->
+<p class="font-body text-on-surface-variant/50 italic text-sm md:text-base">
+                    "That escalated quickly."
+                </p>
+</div>
+<!-- Contextual Action -->
+<div class="mt-12 flex flex-col items-center gap-6">
+<button class="group flex items-center gap-4 bg-on-surface text-surface px-8 py-4 rounded-xl font-bold tracking-tight transition-all hover:scale-105 active:scale-95 shadow-xl shadow-on-surface/10">
+<span>Rest in this moment</span>
+<span class="material-symbols-outlined transition-transform group-hover:translate-x-1" data-icon="air">air</span>
+</button>
+<div class="flex items-center gap-8 text-on-surface-variant/40">
+<button class="hover:text-secondary-dim transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="share">share</span>
+<span class="text-[11px] font-bold uppercase tracking-widest font-label">Share calm</span>
+</button>
+<button class="hover:text-secondary-dim transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="bookmark">bookmark</span>
+<span class="text-[11px] font-bold uppercase tracking-widest font-label">Save quote</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Supplemental Emotional Context Grid (Subtle, secondary to the main card) -->
+<section class="max-w-6xl mx-auto w-full px-6 pb-32">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Card 1: Breathing Pacer -->
+<div class="bg-surface-container-low rounded-lg p-8 flex flex-col items-center justify-center gap-6 group hover:bg-surface-container transition-colors">
+<div class="w-16 h-16 rounded-full border-2 border-secondary-container/50 flex items-center justify-center">
+<div class="w-8 h-8 bg-secondary-container/60 rounded-full animate-pulse"></div>
+</div>
+<div class="text-center">
+<h3 class="font-headline font-bold text-on-surface">Paced Breathing</h3>
+<p class="text-xs text-on-surface-variant mt-1">4-7-8 Rhythm</p>
+</div>
+</div>
+<!-- Card 2: Environment Shift -->
+<div class="relative overflow-hidden rounded-lg group aspect-[16/10] md:aspect-auto h-full">
+<img alt="Mist over a calm forest lake" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="misty morning over a glass-like forest lake with soft muted green and grey tones reflecting in the water" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdeEk3_CoFpQGH1Y9orDOwv3OTz4bBgAIi1CrCML0MClOSShBv3_hCqjeNlxs46BFOKQnij-V-XH0y-_fSM8Wr_rb-FhWRSFxgWbqW-6Qjryc6PmMp2sldhxKc6uJOMMz6-yexEYB8WfHc6pDbbk6In0iS_ntuiA78G7naTooudwJh4gaWMO97ol2PMwpwE3KAykmGljVs7z7eQhMRLFGFvfD6AHS7YwRGZe2Mud2ZWMBoYyESBX5lv3tuHJkekir361mMzTplDo6i"/>
+<div class="absolute inset-0 bg-gradient-to-t from-secondary-dim/80 to-transparent p-8 flex flex-col justify-end">
+<span class="text-[10px] font-bold text-on-secondary/80 uppercase tracking-widest font-label">Ambience</span>
+<h3 class="text-xl font-headline font-bold text-on-secondary">The Morning Mist</h3>
+</div>
+</div>
+<!-- Card 3: Journaling Prompt -->
+<div class="bg-white/60 border border-white p-8 rounded-lg flex flex-col justify-between hover:shadow-lg transition-shadow">
+<div>
+<span class="material-symbols-outlined text-secondary-dim mb-4" data-icon="edit_note">edit_note</span>
+<h3 class="font-headline font-bold text-on-surface mb-2">Release the noise</h3>
+<p class="text-sm text-on-surface-variant">What is one thing you can let go of right now?</p>
+</div>
+<div class="mt-6 flex justify-between items-center">
+<span class="text-[10px] font-bold text-secondary-dim uppercase tracking-widest">Self-Reflect</span>
+<span class="material-symbols-outlined text-secondary-dim/30" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Navigation Shell (Only visible if the flow returns to main navigation, currently semi-transparent to denote focused state) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-8 pt-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-3xl shadow-[0_-10px_40px_0_rgba(0,0,0,0.02)] rounded-t-[3rem]">
+<button class="flex flex-col items-center justify-center text-slate-400 px-6 py-2 transition-colors hover:text-indigo-500">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="spa">spa</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest">Sanctuary</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-indigo-50/50 text-indigo-700/60 rounded-full px-6 py-2">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="query_stats" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest">Reflect</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 px-6 py-2 transition-colors hover:text-indigo-500">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest">Explore</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 px-6 py-2 transition-colors hover:text-indigo-500">
+<span class="material-symbols-outlined text-2xl mb-1" data-icon="person">person</span>
+<span class="font-['Inter'] text-[11px] font-semibold uppercase tracking-widest">Profile</span>
+</button>
+</nav>
+</body></html>

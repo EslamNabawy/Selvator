@@ -1,0 +1,72 @@
+name: Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    name: Build Windows release
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Validate quote index
+        run: dart run tool\validate_quote_index.dart
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Package Windows release
+        shell: pwsh
+        run: |
+          $releasePath = "build\windows\x64\runner\Release"
+          $exe = Get-ChildItem -Path $releasePath -Filter "*.exe" | Select-Object -First 1
+
+          if ($null -eq $exe) {
+            Get-ChildItem -Path $releasePath -Recurse
+            throw "No Windows executable was produced in $releasePath."
+          }
+
+          New-Item -ItemType Directory -Path "artifacts" -Force | Out-Null
+          Compress-Archive `
+            -Path "$releasePath\*" `
+            -DestinationPath "artifacts\Selvator-windows-x64.zip" `
+            -Force
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Selvator-windows-x64
+          path: artifacts/Selvator-windows-x64.zip
+          if-no-files-found: error
+          retention-days: 14
