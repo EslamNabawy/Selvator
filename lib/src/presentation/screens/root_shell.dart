@@ -691,33 +691,13 @@ class HomeScreen extends StatelessWidget {
           if (!showDesktopSearch)
             const _ScreenTopBar(
               title: 'Selvator',
-              subtitle: 'Your living sanctuary',
+              subtitle: '',
               icon: Icons.settings_rounded,
-            ),
-          if (showDesktopSearch)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: TextField(
-                controller: controller.searchController,
-                focusNode: controller.searchFocusNode,
-                onChanged: controller.updateSearchQuery,
-                decoration: const InputDecoration(
-                  hintText: 'Search quotes, authors, or tags',
-                  prefixIcon: Icon(Icons.search_rounded),
-                  isDense: true,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 14,
-                  ),
-                ),
-              ),
             ),
           _HeroStatement(
             greeting: controller.homeGreeting,
             greetingOverride: controller.greetingOverride,
             selectedMood: controller.selectedMood,
-            selectedMoods: controller.selectedMoods,
-            avgRefreshRate: controller.sessionAggregates.avgRefreshRate,
           ),
           SizedBox(height: showDesktopSearch ? 18 : 24),
           MoodChipRow(
@@ -2217,7 +2197,22 @@ class _DesktopSidebar extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 18),
+                    TextField(
+                      controller: controller.searchController,
+                      focusNode: controller.searchFocusNode,
+                      onChanged: controller.updateSearchQuery,
+                      decoration: const InputDecoration(
+                        hintText: 'Search',
+                        prefixIcon: Icon(Icons.search_rounded),
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
                     for (final entry in [
                       (index: 0, label: 'Sanctuary', icon: Icons.spa_rounded),
                       (
@@ -2511,13 +2506,15 @@ class _ScreenTopBar extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.headlineSmall,
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              if (subtitle.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ],
           ),
         ),
@@ -2542,21 +2539,15 @@ class _HeroStatement extends StatelessWidget {
     required this.greeting,
     required this.greetingOverride,
     required this.selectedMood,
-    required this.selectedMoods,
-    required this.avgRefreshRate,
   });
 
   final PersonalizedGreeting greeting;
   final String? greetingOverride;
   final MoodType selectedMood;
-  final List<MoodType> selectedMoods;
-  final double avgRefreshRate;
 
   @override
   Widget build(BuildContext context) {
     final accent = moodColors[selectedMood]!;
-    final mascot = silvatorMascotProfileFor(selectedMood);
-    final selectionLabel = _moodSelectionLabel(selectedMoods).toLowerCase();
 
     Widget greetingText() {
       final phone = MediaQuery.sizeOf(context).width < 420;
@@ -2590,22 +2581,6 @@ class _HeroStatement extends StatelessWidget {
                   height: 1.08,
                 ),
               ),
-              const SizedBox(height: 10),
-              Text(
-                greetingOverride ?? greeting.body,
-                maxLines: wide ? 2 : 3,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(height: 1.45),
-              ),
-              if (!wide) ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Tuned for $selectionLabel energy with ${mascot.symbol}.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
             ],
           ),
         ),
