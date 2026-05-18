@@ -33,54 +33,55 @@ class MoodChipRow extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final useWrap = constraints.maxWidth >= 720;
         final compact = constraints.maxWidth < 420;
+        final desktopRail = constraints.maxWidth >= 720;
+        final pillCompact = compact || desktopRail;
+        final railHeight = compact ? 58.0 : (desktopRail ? 56.0 : 64.0);
+        final showRelatedMoods =
+            constraints.maxWidth < 720 && relatedMoods.isNotEmpty;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (useWrap)
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  for (final mood in MoodType.values)
-                    _MoodPill(
-                      mood: mood,
-                      selected: activeMoods.contains(mood),
-                      enabled: activeMoods.contains(mood) || !selectionFull,
-                      compact: false,
-                      onTap: () => onMoodSelected(mood),
-                    ),
-                ],
-              )
-            else
-              SizedBox(
-                height: compact ? 62 : 68,
-                child: ScrollConfiguration(
-                  behavior: const MaterialScrollBehavior().copyWith(
-                    dragDevices: PointerDeviceKind.values.toSet(),
-                    scrollbars: false,
-                  ),
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: MoodType.values.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final mood = MoodType.values[index];
-                      return _MoodPill(
-                        mood: mood,
-                        selected: activeMoods.contains(mood),
-                        enabled: activeMoods.contains(mood) || !selectionFull,
-                        compact: compact,
-                        onTap: () => onMoodSelected(mood),
-                      );
-                    },
+            SizedBox(
+              height: railHeight,
+              child: ScrollConfiguration(
+                behavior: const MaterialScrollBehavior().copyWith(
+                  dragDevices: PointerDeviceKind.values.toSet(),
+                  scrollbars: false,
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (
+                        var index = 0;
+                        index < MoodType.values.length;
+                        index++
+                      ) ...[
+                        Builder(
+                          builder: (context) {
+                            final mood = MoodType.values[index];
+                            return _MoodPill(
+                              mood: mood,
+                              selected: activeMoods.contains(mood),
+                              enabled:
+                                  activeMoods.contains(mood) || !selectionFull,
+                              compact: pillCompact,
+                              onTap: () => onMoodSelected(mood),
+                            );
+                          },
+                        ),
+                        if (index < MoodType.values.length - 1)
+                          SizedBox(width: desktopRail ? 8 : 10),
+                      ],
+                    ],
                   ),
                 ),
               ),
-            if (relatedMoods.isNotEmpty) ...[
-              const SizedBox(height: 10),
+            ),
+            if (showRelatedMoods) ...[
+              const SizedBox(height: 8),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -176,7 +177,7 @@ class _MoodPill extends StatelessWidget {
         : Theme.of(context).textTheme.labelLarge?.color;
 
     final pill = AnimatedScale(
-      scale: selected && enabled ? 1.04 : 1,
+      scale: selected && enabled ? 1.02 : 1,
       duration: motionDisabled
           ? Duration.zero
           : const Duration(milliseconds: 220),
@@ -221,7 +222,7 @@ class _MoodPill extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: compact ? 12 : 16,
-                  vertical: compact ? 10 : 12,
+                  vertical: compact ? 9 : 12,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -231,8 +232,8 @@ class _MoodPill extends StatelessWidget {
                           ? Duration.zero
                           : const Duration(milliseconds: 240),
                       curve: Curves.easeOutCubic,
-                      width: compact ? 28 : 34,
-                      height: compact ? 28 : 34,
+                      width: compact ? 26 : 34,
+                      height: compact ? 26 : 34,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: avatarColor,
@@ -241,11 +242,11 @@ class _MoodPill extends StatelessWidget {
                       clipBehavior: Clip.antiAlias,
                       child: SilvatorMascotAvatar(
                         mood: mood,
-                        width: compact ? 28 : 34,
-                        height: compact ? 28 : 34,
+                        width: compact ? 26 : 34,
+                        height: compact ? 26 : 34,
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    SizedBox(width: compact ? 8 : 10),
                     Text(
                       mood.label,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(

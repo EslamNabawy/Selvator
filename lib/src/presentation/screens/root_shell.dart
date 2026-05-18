@@ -91,27 +91,6 @@ class RootShell extends ConsumerWidget {
               ),
               child: Stack(
                 children: [
-                  _AtmosphereBlob(
-                    alignment: Alignment(-1.1, -0.9),
-                    color: dark
-                        ? const Color(0x223D4A62)
-                        : const Color(0x55F5B54D),
-                    size: 320,
-                  ),
-                  _AtmosphereBlob(
-                    alignment: Alignment(1.05, -0.25),
-                    color: dark
-                        ? const Color(0x2252A7A0)
-                        : const Color(0x557FE6DB),
-                    size: 360,
-                  ),
-                  _AtmosphereBlob(
-                    alignment: Alignment(0.15, 1.05),
-                    color: dark
-                        ? const Color(0x266E75B8)
-                        : const Color(0x55A9B4FF),
-                    size: 300,
-                  ),
                   if (desktop)
                     _DesktopShell(controller: controller)
                   else
@@ -636,7 +615,7 @@ class _DesktopShell extends StatelessWidget {
             _DesktopSidebar(controller: controller),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 24, 12, 24),
+                padding: const EdgeInsets.fromLTRB(0, 18, 18, 18),
                 child: controller.isDecompressing
                     ? DecompressScreen(controller: controller)
                     : IndexedStack(
@@ -662,7 +641,7 @@ class _DesktopShell extends StatelessWidget {
               SizedBox(
                 width: 380,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 24, 24, 24),
+                  padding: const EdgeInsets.fromLTRB(0, 18, 18, 18),
                   child: _DesktopRightPanel(controller: controller),
                 ),
               ),
@@ -701,10 +680,10 @@ class HomeScreen extends StatelessWidget {
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
-        showDesktopSearch ? 20 : (phone ? 16 : 20),
-        16,
-        showDesktopSearch ? 20 : (phone ? 16 : 20),
-        showDesktopSearch ? 24 : 0,
+        showDesktopSearch ? 24 : (phone ? 16 : 20),
+        showDesktopSearch ? 20 : 16,
+        showDesktopSearch ? 24 : (phone ? 16 : 20),
+        showDesktopSearch ? 28 : 0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -717,7 +696,7 @@ class HomeScreen extends StatelessWidget {
             ),
           if (showDesktopSearch)
             Padding(
-              padding: const EdgeInsets.only(bottom: 18),
+              padding: const EdgeInsets.only(bottom: 14),
               child: TextField(
                 controller: controller.searchController,
                 focusNode: controller.searchFocusNode,
@@ -725,6 +704,11 @@ class HomeScreen extends StatelessWidget {
                 decoration: const InputDecoration(
                   hintText: 'Search quotes, authors, or tags',
                   prefixIcon: Icon(Icons.search_rounded),
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
                 ),
               ),
             ),
@@ -735,14 +719,14 @@ class HomeScreen extends StatelessWidget {
             selectedMoods: controller.selectedMoods,
             avgRefreshRate: controller.sessionAggregates.avgRefreshRate,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: showDesktopSearch ? 18 : 24),
           MoodChipRow(
             selectedMood: controller.selectedMood,
             selectedMoods: controller.selectedMoods,
             maxSelectedMoods: maxSelectedMoodSelections,
             onMoodSelected: controller.toggleMoodSelection,
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: showDesktopSearch ? 22 : 28),
           if (currentQuote != null)
             _QuoteSwitcher(
               child: QuoteCard(
@@ -761,8 +745,8 @@ class HomeScreen extends StatelessWidget {
                     : null,
                 onRefresh: controller.refreshQuote,
                 title: '$selectedMoodLabel quotes',
-                subtitle:
-                    'A curated quote shaped by your active moods, likes, freshness, and nearby moods.',
+                subtitle: 'Freshly matched to your selected mood mix.',
+                compact: showDesktopSearch,
               ),
             )
           else
@@ -771,24 +755,26 @@ class HomeScreen extends StatelessWidget {
               message:
                   'Pick one or more moods and Selvator will bring the right words forward.',
             ),
-          const SizedBox(height: 22),
-          _InsightGrid(
-            tablet: tablet || showDesktopSearch,
-            accent: accent,
-            quoteOfDay: quoteOfDay,
-            quoteOfDayLiked:
-                quoteOfDay != null &&
-                profile.likedQuoteIds.contains(quoteOfDay.id),
-            selectedMood: controller.selectedMood,
-            savedCount: controller.profile.likedQuoteIds.length,
-            avgRefreshRate: controller.sessionAggregates.avgRefreshRate,
-            onLikeQuote: controller.toggleLike,
-            onCopyQuote: controller.copyQuote,
-            onShareQuote: controller.shareQuote,
-            onOpenQuoteOfDay: quoteOfDay == null
-                ? null
-                : () => onOpenDetails(quoteOfDay),
-          ),
+          if (!showDesktopSearch) ...[
+            const SizedBox(height: 22),
+            _InsightGrid(
+              tablet: tablet,
+              accent: accent,
+              quoteOfDay: quoteOfDay,
+              quoteOfDayLiked:
+                  quoteOfDay != null &&
+                  profile.likedQuoteIds.contains(quoteOfDay.id),
+              selectedMood: controller.selectedMood,
+              savedCount: controller.profile.likedQuoteIds.length,
+              avgRefreshRate: controller.sessionAggregates.avgRefreshRate,
+              onLikeQuote: controller.toggleLike,
+              onCopyQuote: controller.copyQuote,
+              onShareQuote: controller.shareQuote,
+              onOpenQuoteOfDay: quoteOfDay == null
+                  ? null
+                  : () => onOpenDetails(quoteOfDay),
+            ),
+          ],
         ],
       ),
     );
@@ -1886,19 +1872,19 @@ class _DesktopSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final moodTrail = controller.profile.recentMoodTrail.reversed
-        .take(6)
+        .take(4)
         .toList();
     final selectedSurface = context.selectedSurface();
     final brandInk = context.brandInk();
     final idleInk = context.mutedInk();
 
     return Container(
-      width: 284,
-      margin: const EdgeInsets.all(24),
-      padding: const EdgeInsets.all(20),
+      width: 246,
+      margin: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: context.glassSurface(lightAlpha: 0.72, darkAlpha: 0.88),
-        borderRadius: BorderRadius.circular(34),
+        borderRadius: BorderRadius.circular(28),
         border: Border.all(color: context.surfaceStroke()),
       ),
       child: LayoutBuilder(
@@ -1929,11 +1915,11 @@ class _DesktopSidebar extends StatelessWidget {
                           'Selvator',
                           style: Theme.of(
                             context,
-                          ).textTheme.headlineSmall?.copyWith(color: brandInk),
+                          ).textTheme.titleLarge?.copyWith(color: brandInk),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 26),
+                    const SizedBox(height: 22),
                     for (final entry in [
                       (index: 0, label: 'Sanctuary', icon: Icons.spa_rounded),
                       (
@@ -1955,14 +1941,14 @@ class _DesktopSidebar extends StatelessWidget {
                           onTap: () => controller.setSelectedTab(entry.index),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
+                              horizontal: 14,
+                              vertical: 12,
                             ),
                             decoration: BoxDecoration(
                               color: controller.selectedTab == entry.index
                                   ? selectedSurface
                                   : Colors.transparent,
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
                               children: [
@@ -1975,7 +1961,7 @@ class _DesktopSidebar extends StatelessWidget {
                                 const SizedBox(width: 12),
                                 Text(
                                   entry.label,
-                                  style: Theme.of(context).textTheme.titleMedium
+                                  style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(
                                         color:
                                             controller.selectedTab ==
@@ -1989,7 +1975,7 @@ class _DesktopSidebar extends StatelessWidget {
                           ),
                         ),
                       ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     Text(
                       'Recent moods',
                       style: Theme.of(context).textTheme.titleMedium,
@@ -2014,7 +2000,7 @@ class _DesktopSidebar extends StatelessWidget {
                     Card(
                       margin: EdgeInsets.zero,
                       child: Padding(
-                        padding: const EdgeInsets.all(18),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -2276,6 +2262,7 @@ class _HeroStatement extends StatelessWidget {
 
     Widget greetingText() {
       final phone = MediaQuery.sizeOf(context).width < 420;
+      final wide = MediaQuery.sizeOf(context).width >= 900;
       return AnimatedSwitcher(
         duration: MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
@@ -2291,7 +2278,7 @@ class _HeroStatement extends StatelessWidget {
             children: [
               Text(
                 greeting.salutation,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: context.isDarkMode
                       ? const Color(0xFFE8C877)
                       : const Color(0xFFA87716),
@@ -2301,20 +2288,26 @@ class _HeroStatement extends StatelessWidget {
               Text(
                 greeting.headline,
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontSize: phone ? 34 : 42,
-                  height: 1.0,
+                  fontSize: phone ? 32 : (wide ? 34 : 38),
+                  height: 1.08,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Text(
-                '${greetingOverride ?? greeting.body} Selvator is tuned for $selectionLabel energy, with ${mascot.symbol} leading the mood.',
-                style: Theme.of(context).textTheme.bodyLarge,
+                greetingOverride ?? greeting.body,
+                maxLines: wide ? 2 : 3,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(height: 1.45),
               ),
-              const SizedBox(height: 8),
-              Text(
-                'Average refresh pace: ${avgRefreshRate.toStringAsFixed(1)} taps per minute.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+              if (!wide) ...[
+                const SizedBox(height: 8),
+                Text(
+                  'Tuned for $selectionLabel energy with ${mascot.symbol}.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
             ],
           ),
         ),
@@ -2366,11 +2359,11 @@ class _HeroMascotStage extends StatelessWidget {
           ? Duration.zero
           : const Duration(milliseconds: 360),
       curve: Curves.easeOutCubic,
-      width: 118,
-      height: 136,
+      width: 98,
+      height: 112,
       decoration: BoxDecoration(
         color: context.accentSurface(accent, lightAlpha: 0.22),
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(color: context.surfaceStroke()),
         boxShadow: [
           BoxShadow(
@@ -2401,8 +2394,8 @@ class _HeroMascotStage extends StatelessWidget {
           child: SilvatorMascotAvatar(
             key: const Key('home-hero-mascot'),
             mood: selectedMood,
-            width: 118,
-            height: 136,
+            width: 98,
+            height: 112,
             fit: BoxFit.contain,
             semanticLabel: '${selectedMood.label} hero mascot',
           ),
@@ -2701,32 +2694,6 @@ class _MetricLine extends StatelessWidget {
           ).textTheme.titleMedium?.copyWith(color: brandInk),
         ),
       ],
-    );
-  }
-}
-
-class _AtmosphereBlob extends StatelessWidget {
-  const _AtmosphereBlob({
-    required this.alignment,
-    required this.color,
-    required this.size,
-  });
-
-  final Alignment alignment;
-  final Color color;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Align(
-        alignment: alignment,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-        ),
-      ),
     );
   }
 }

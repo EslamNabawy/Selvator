@@ -45,7 +45,7 @@ class QuoteCard extends StatelessWidget {
 
     final card = Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(effectiveCompact ? 26 : 34),
+        borderRadius: BorderRadius.circular(effectiveCompact ? 22 : 30),
         gradient: LinearGradient(
           colors: [
             context.glassSurfaceHigh(lightAlpha: 0.88, darkAlpha: 0.92),
@@ -68,10 +68,10 @@ class QuoteCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(effectiveCompact ? 26 : 34),
+          borderRadius: BorderRadius.circular(effectiveCompact ? 22 : 30),
           onTap: onShowDetails,
           child: Padding(
-            padding: EdgeInsets.all(effectiveCompact ? 18 : 28),
+            padding: EdgeInsets.all(effectiveCompact ? 18 : 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -153,26 +153,30 @@ class QuoteCard extends StatelessWidget {
                   ],
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Text(
                     subtitle!,
+                    maxLines: effectiveCompact ? 1 : 2,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
-                const SizedBox(height: 18),
+                SizedBox(height: effectiveCompact ? 14 : 18),
                 Text(
                   '"${quote.text}"',
+                  maxLines: effectiveCompact ? 4 : 6,
+                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.lora(
                     textStyle: effectiveCompact
                         ? theme.textTheme.headlineSmall
                         : theme.textTheme.headlineMedium,
-                    height: 1.45,
+                    height: effectiveCompact ? 1.38 : 1.45,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 18),
+                SizedBox(height: effectiveCompact ? 14 : 18),
                 Row(
                   children: [
                     Container(
@@ -201,7 +205,7 @@ class QuoteCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: effectiveCompact ? 16 : 20),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
@@ -215,8 +219,8 @@ class QuoteCard extends StatelessWidget {
                             ? const Color(0xFF1B1A14)
                             : Colors.white,
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
+                          horizontal: 14,
+                          vertical: 12,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(22),
