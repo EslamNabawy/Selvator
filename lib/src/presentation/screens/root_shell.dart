@@ -2550,8 +2550,14 @@ class _HeroStatement extends StatelessWidget {
     final accent = moodColors[selectedMood]!;
 
     Widget greetingText() {
-      final phone = MediaQuery.sizeOf(context).width < 420;
-      final wide = MediaQuery.sizeOf(context).width >= 900;
+      final width = MediaQuery.sizeOf(context).width;
+      final phone = width < 420;
+      final wide = width >= 1100;
+      final theme = Theme.of(context);
+      final headlineSize = phone ? 34.0 : (wide ? 50.0 : 42.0);
+      final salutationColor = context.isDarkMode
+          ? const Color(0xFFF4D887)
+          : const Color(0xFF8F6313);
       return AnimatedSwitcher(
         duration: MediaQuery.disableAnimationsOf(context)
             ? Duration.zero
@@ -2562,26 +2568,102 @@ class _HeroStatement extends StatelessWidget {
           key: ValueKey<String>(
             '${greeting.salutation}-${greeting.headline}-${greetingOverride ?? ''}-${selectedMood.name}',
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                greeting.salutation,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: context.isDarkMode
-                      ? const Color(0xFFE8C877)
-                      : const Color(0xFFA87716),
+          child: AnimatedContainer(
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 360),
+            curve: Curves.easeOutCubic,
+            padding: EdgeInsets.fromLTRB(
+              phone ? 18 : 24,
+              phone ? 18 : 22,
+              phone ? 18 : 26,
+              phone ? 20 : 26,
+            ),
+            decoration: BoxDecoration(
+              color: context.glassSurface(lightAlpha: 0.5, darkAlpha: 0.34),
+              borderRadius: BorderRadius.circular(phone ? 28 : 36),
+              border: Border.all(
+                color: accent.withValues(
+                  alpha: context.isDarkMode ? 0.28 : 0.32,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                greeting.headline,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                  fontSize: phone ? 32 : (wide ? 34 : 38),
-                  height: 1.08,
+              boxShadow: [
+                BoxShadow(
+                  color: accent.withValues(
+                    alpha: context.isDarkMode ? 0.08 : 0.16,
+                  ),
+                  blurRadius: phone ? 26 : 42,
+                  offset: const Offset(0, 20),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.accentSurface(accent, lightAlpha: 0.15),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: accent.withValues(
+                        alpha: context.isDarkMode ? 0.26 : 0.22,
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: phone ? 12 : 14,
+                      vertical: phone ? 7 : 8,
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 9,
+                          height: 9,
+                          decoration: BoxDecoration(
+                            color: accent,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: accent.withValues(alpha: 0.42),
+                                blurRadius: 12,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 9),
+                        Flexible(
+                          child: Text(
+                            greeting.salutation,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: salutationColor,
+                              fontSize: phone ? 17 : 19,
+                              fontWeight: FontWeight.w800,
+                              height: 1.05,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  greeting.headline,
+                  style: theme.textTheme.displayMedium?.copyWith(
+                    fontSize: headlineSize,
+                    fontWeight: FontWeight.w800,
+                    height: 1.04,
+                    letterSpacing: 0,
+                    color: context.isDarkMode
+                        ? const Color(0xFFF4F1F7)
+                        : const Color(0xFF24272C),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
