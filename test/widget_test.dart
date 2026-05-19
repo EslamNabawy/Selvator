@@ -76,6 +76,33 @@ void main() {
     expect(selectedMood, MoodType.calm);
   });
 
+  testWidgets('desktop mood chip row exposes carousel arrows', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: WiselyTheme.dark(),
+        home: Scaffold(
+          body: SizedBox(
+            width: 760,
+            child: MoodChipRow(
+              selectedMood: MoodType.happy,
+              selectedMoods: const [MoodType.happy],
+              maxSelectedMoods: maxSelectedMoodSelections,
+              onMoodSelected: (_) {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byTooltip('More moods'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('More moods'));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Previous moods'), findsOneWidget);
+  });
+
   testWidgets('home hero renders selected mood mascot and updates on rebuild', (
     tester,
   ) async {

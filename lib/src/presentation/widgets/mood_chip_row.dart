@@ -5,7 +5,7 @@ import 'package:wisely/src/domain/entities/mood_type.dart';
 import 'package:wisely/src/presentation/theme/wisely_theme.dart';
 import 'package:wisely/src/presentation/widgets/silvator_mascot_avatar.dart';
 
-class MoodChipRow extends StatelessWidget {
+class MoodChipRow extends StatefulWidget {
   const MoodChipRow({
     super.key,
     required this.selectedMood,
@@ -20,15 +20,81 @@ class MoodChipRow extends StatelessWidget {
   final int maxSelectedMoods;
 
   @override
+  State<MoodChipRow> createState() => _MoodChipRowState();
+}
+
+class _MoodChipRowState extends State<MoodChipRow> {
+  final ScrollController _moodRailController = ScrollController();
+  bool _canScrollBack = false;
+  bool _canScrollForward = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _moodRailController.addListener(_updateScrollButtons);
+  }
+
+  @override
+  void dispose() {
+    _moodRailController
+      ..removeListener(_updateScrollButtons)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _updateScrollButtons() {
+    if (!_moodRailController.hasClients) {
+      return;
+    }
+    final position = _moodRailController.position;
+    final nextCanScrollBack = position.pixels > position.minScrollExtent + 8;
+    final nextCanScrollForward = position.pixels < position.maxScrollExtent - 8;
+    if (nextCanScrollBack == _canScrollBack &&
+        nextCanScrollForward == _canScrollForward) {
+      return;
+    }
+    setState(() {
+      _canScrollBack = nextCanScrollBack;
+      _canScrollForward = nextCanScrollForward;
+    });
+  }
+
+  void _scheduleScrollButtonUpdate() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _updateScrollButtons();
+      }
+    });
+  }
+
+  void _scrollMoodRail(double direction) {
+    if (!_moodRailController.hasClients) {
+      return;
+    }
+    final position = _moodRailController.position;
+    final target = (position.pixels + (direction * 280))
+        .clamp(position.minScrollExtent, position.maxScrollExtent)
+        .toDouble();
+    _moodRailController.animateTo(
+      target,
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final relatedMoods = (moodAdjacencyMap[selectedMood] ?? const <MoodType>[])
-        .where((mood) => mood != selectedMood)
-        .take(3)
-        .toList(growable: false);
-    final activeMoods = selectedMoods.isEmpty
-        ? {selectedMood}
-        : selectedMoods.toSet();
-    final selectionFull = activeMoods.length >= maxSelectedMoods;
+    final relatedMoods =
+        (moodAdjacencyMap[widget.selectedMood] ?? const <MoodType>[])
+            .where((mood) => mood != widget.selectedMood)
+            .take(3)
+            .toList(growable: false);
+    final activeMoods = widget.selectedMoods.isEmpty
+        ? {widget.selectedMood}
+        : widget.selectedMoods.toSet();
+    final selectionFull = activeMoods.length >= widget.maxSelectedMoods;
     final dark = context.isDarkMode;
 
     return LayoutBuilder(
@@ -39,45 +105,75 @@ class MoodChipRow extends StatelessWidget {
         final railHeight = compact ? 58.0 : (desktopRail ? 56.0 : 64.0);
         final showRelatedMoods =
             constraints.maxWidth < 720 && relatedMoods.isNotEmpty;
+        _scheduleScrollButtonUpdate();
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               height: railHeight,
-              child: ScrollConfiguration(
-                behavior: const MaterialScrollBehavior().copyWith(
-                  dragDevices: PointerDeviceKind.values.toSet(),
-                  scrollbars: false,
-                ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      for (
-                        var index = 0;
-                        index < MoodType.values.length;
-                        index++
-                      ) ...[
-                        Builder(
-                          builder: (context) {
-                            final mood = MoodType.values[index];
-                            return _MoodPill(
-                              mood: mood,
-                              selected: activeMoods.contains(mood),
-                              enabled:
-                                  activeMoods.contains(mood) || !selectionFull,
-                              compact: pillCompact,
-                              onTap: () => onMoodSelected(mood),
-                            );
-                          },
-                        ),
-                        if (index < MoodType.values.length - 1)
-                          SizedBox(width: desktopRail ? 8 : 10),
-                      ],
-                    ],
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  ScrollConfiguration(
+                    behavior: const MaterialScrollBehavior().copyWith(
+                      dragDevices: PointerDeviceKind.values.toSet(),
+                      scrollbars: false,
+                    ),
+                    child: SingleChildScrollView(
+                      controller: _moodRailController,
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsets.only(
+                        left: desktopRail ? 4 : 0,
+                        right: desktopRail ? 52 : 0,
+                      ),
+                      child: Row(
+                        children: [
+                          for (
+                            var index = 0;
+                            index < MoodType.values.length;
+                            index++
+                          ) ...[
+                            Builder(
+                              builder: (context) {
+                                final mood = MoodType.values[index];
+                                return _MoodPill(
+                                  mood: mood,
+                                  selected: activeMoods.contains(mood),
+                                  enabled:
+                                      activeMoods.contains(mood) ||
+                                      !selectionFull,
+                                  compact: pillCompact,
+                                  onTap: () => widget.onMoodSelected(mood),
+                                );
+                              },
+                            ),
+                            if (index < MoodType.values.length - 1)
+                              SizedBox(width: desktopRail ? 8 : 10),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  if (desktopRail && _canScrollBack)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: _MoodRailArrowButton(
+                        icon: Icons.chevron_left_rounded,
+                        tooltip: 'Previous moods',
+                        onPressed: () => _scrollMoodRail(-1),
+                      ),
+                    ),
+                  if (desktopRail && _canScrollForward)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: _MoodRailArrowButton(
+                        icon: Icons.chevron_right_rounded,
+                        tooltip: 'More moods',
+                        onPressed: () => _scrollMoodRail(1),
+                      ),
+                    ),
+                ],
               ),
             ),
             if (showRelatedMoods) ...[
@@ -98,7 +194,7 @@ class MoodChipRow extends StatelessWidget {
                               activeMoods.contains(mood) || !selectionFull;
                           return ActionChip(
                             onPressed: enabled
-                                ? () => onMoodSelected(mood)
+                                ? () => widget.onMoodSelected(mood)
                                 : null,
                             tooltip: enabled ? null : 'Pick up to 3 moods',
                             backgroundColor: moodSurface(
@@ -139,6 +235,59 @@ class MoodChipRow extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _MoodRailArrowButton extends StatelessWidget {
+  const _MoodRailArrowButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = context.isDarkMode;
+    final surface = dark
+        ? const Color(0xFF10141B).withValues(alpha: 0.9)
+        : const Color(0xFFEFF4F4).withValues(alpha: 0.94);
+    final shadow = dark
+        ? Colors.black.withValues(alpha: 0.28)
+        : const Color(0xFF4C566A).withValues(alpha: 0.12);
+
+    return Tooltip(
+      message: tooltip,
+      child: Container(
+        width: 42,
+        height: 42,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: surface,
+          border: Border.all(color: context.surfaceStroke()),
+          boxShadow: [
+            BoxShadow(
+              color: shadow,
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onPressed,
+            child: Icon(icon, color: context.brandInk(), size: 28),
+          ),
+        ),
+      ),
     );
   }
 }
