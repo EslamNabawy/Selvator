@@ -110,35 +110,65 @@ class RootShell extends ConsumerWidget {
     WiselyController controller,
   ) {
     return {
-      const SingleActivator(LogicalKeyboardKey.space): controller.refreshQuote,
-      const SingleActivator(LogicalKeyboardKey.keyL): controller.toggleLike,
-      const SingleActivator(LogicalKeyboardKey.keyC): controller.copyQuote,
-      const SingleActivator(LogicalKeyboardKey.keyS): controller.shareQuote,
-      const SingleActivator(LogicalKeyboardKey.slash): () {
-        controller.searchFocusNode.requestFocus();
-      },
-      const SingleActivator(LogicalKeyboardKey.escape):
-          controller.closeRightPanel,
+      const SingleActivator(LogicalKeyboardKey.space): () =>
+          _runShellShortcut(controller.refreshQuote),
+      const SingleActivator(LogicalKeyboardKey.keyL): () =>
+          _runShellShortcut(controller.toggleLike),
+      const SingleActivator(LogicalKeyboardKey.keyC): () =>
+          _runShellShortcut(controller.copyQuote),
+      const SingleActivator(LogicalKeyboardKey.keyS): () =>
+          _runShellShortcut(controller.shareQuote),
+      const SingleActivator(LogicalKeyboardKey.slash): () =>
+          _runShellShortcut(controller.searchFocusNode.requestFocus),
+      const SingleActivator(LogicalKeyboardKey.escape): () =>
+          _runShellShortcut(controller.closeRightPanel),
       const SingleActivator(LogicalKeyboardKey.digit1): () =>
-          controller.selectMood(MoodType.happy),
+          _runShellShortcut(() => controller.selectMood(MoodType.happy)),
       const SingleActivator(LogicalKeyboardKey.digit2): () =>
-          controller.selectMood(MoodType.calm),
+          _runShellShortcut(() => controller.selectMood(MoodType.calm)),
       const SingleActivator(LogicalKeyboardKey.digit3): () =>
-          controller.selectMood(MoodType.motivated),
+          _runShellShortcut(() => controller.selectMood(MoodType.motivated)),
       const SingleActivator(LogicalKeyboardKey.digit4): () =>
-          controller.selectMood(MoodType.love),
+          _runShellShortcut(() => controller.selectMood(MoodType.love)),
       const SingleActivator(LogicalKeyboardKey.digit5): () =>
-          controller.selectMood(MoodType.hopeful),
+          _runShellShortcut(() => controller.selectMood(MoodType.hopeful)),
       const SingleActivator(LogicalKeyboardKey.digit6): () =>
-          controller.selectMood(MoodType.reflective),
+          _runShellShortcut(() => controller.selectMood(MoodType.reflective)),
       const SingleActivator(LogicalKeyboardKey.digit7): () =>
-          controller.selectMood(MoodType.confident),
+          _runShellShortcut(() => controller.selectMood(MoodType.confident)),
       const SingleActivator(LogicalKeyboardKey.digit8): () =>
-          controller.selectMood(MoodType.grateful),
+          _runShellShortcut(() => controller.selectMood(MoodType.grateful)),
       const SingleActivator(LogicalKeyboardKey.digit9): () =>
-          controller.selectMood(MoodType.focused),
+          _runShellShortcut(() => controller.selectMood(MoodType.focused)),
     };
   }
+}
+
+void _runShellShortcut(VoidCallback action) {
+  if (_editableTextHasPrimaryFocus()) {
+    return;
+  }
+  action();
+}
+
+bool _editableTextHasPrimaryFocus() {
+  final focusedContext = FocusManager.instance.primaryFocus?.context;
+  if (focusedContext == null) {
+    return false;
+  }
+  if (focusedContext.widget is EditableText) {
+    return true;
+  }
+
+  var foundEditableText = false;
+  focusedContext.visitAncestorElements((element) {
+    if (element.widget is EditableText) {
+      foundEditableText = true;
+      return false;
+    }
+    return true;
+  });
+  return foundEditableText;
 }
 
 class OnboardingScreen extends ConsumerStatefulWidget {

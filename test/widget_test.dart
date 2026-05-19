@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wisely/src/application/ports/platform_ports.dart';
 import 'package:wisely/src/application/state/wisely_controller.dart';
@@ -415,6 +416,73 @@ void main() {
 
     expect(controller.deletedEntryId, 'journal-1');
     expect(find.text('Existing happy note'), findsNothing);
+  });
+
+  testWidgets('journal text input does not trigger shell keyboard shortcuts', (
+    tester,
+  ) async {
+    final quoteActions = _RecordingQuoteActions();
+    final quote = _quote(id: 'current');
+    final container = ProviderContainer(
+      overrides: [
+        quoteRepositoryProvider.overrideWithValue(
+          _NoopQuoteRepository(
+            profile: UserProfile.initial().copyWith(
+              displayName: 'Test',
+              gender: UserGender.male,
+              preferredMoods: const [MoodType.happy],
+              widgetMood: MoodType.happy,
+            ),
+            quotes: [quote],
+          ),
+        ),
+        moodJournalRepositoryProvider.overrideWithValue(
+          _NoopMoodJournalRepository(),
+        ),
+        quoteWidgetPortProvider.overrideWithValue(_NoopQuoteWidget()),
+        trayPortProvider.overrideWithValue(_NoopTray()),
+        quoteActionsPortProvider.overrideWithValue(quoteActions),
+        appExitPortProvider.overrideWithValue(_NoopAppExit()),
+      ],
+    );
+    var containerDisposed = false;
+    addTearDown(() {
+      if (!containerDisposed) {
+        container.dispose();
+      }
+    });
+
+    final controller = container.read(wiselyControllerProvider.notifier);
+    await controller.initialize();
+    await controller.setSelectedTab(1);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(theme: WiselyTheme.light(), home: const RootShell()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final noteField = find.byKey(const Key('mood-journal-note-field'));
+    await tester.ensureVisible(noteField);
+    await tester.showKeyboard(noteField);
+    await tester.pump();
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit2);
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+
+    final state = container.read(wiselyControllerProvider);
+    expect(quoteActions.copyCount, 0);
+    expect(quoteActions.shareCount, 0);
+    expect(state.selectedMood, MoodType.happy);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    container.dispose();
+    containerDisposed = true;
   });
 
   testWidgets('decompression screen hides pending quote until completion', (
@@ -960,7 +1028,14 @@ class _FakeWiselyController implements WiselyController {
 }
 
 class _NoopQuoteRepository implements QuoteRepository {
-  UserProfile _profile = UserProfile.initial();
+  _NoopQuoteRepository({
+    UserProfile? profile,
+    List<QuoteEntry> quotes = const [],
+  }) : _profile = profile ?? UserProfile.initial(),
+       _quotes = quotes;
+
+  UserProfile _profile;
+  final List<QuoteEntry> _quotes;
 
   @override
   UserProfile get profile => _profile;
@@ -972,28 +1047,59 @@ class _NoopQuoteRepository implements QuoteRepository {
   CatalogVersion? get catalogVersion => null;
 
   @override
-  List<QuoteEntry> get allQuotes => const [];
+  List<QuoteEntry> get allQuotes => _quotes;
 
   @override
   Future<void> initialize() async {}
 
   @override
-  QuoteEntry? quoteById(String id) => null;
+  QuoteEntry? quoteById(String id) {
+    for (final quote in _quotes) {
+      if (quote.id == id) {
+        return quote;
+      }
+    }
+    return null;
+  }
 
   @override
-  List<QuoteEntry> quotesByIds(Iterable<String> ids) => const [];
+  List<QuoteEntry> quotesByIds(Iterable<String> ids) {
+    final idSet = ids.toSet();
+    return _quotes.where((quote) => idSet.contains(quote.id)).toList();
+  }
 
   @override
-  List<String> moodPoolIds(MoodType mood, PoolTier tier) => const [];
+  List<String> moodPoolIds(MoodType mood, PoolTier tier) {
+    return _quotes
+        .where((quote) => quote.poolTier[mood] == tier)
+        .map((quote) => quote.id)
+        .toList();
+  }
 
   @override
-  List<String> globalTopIds() => const [];
+  List<String> globalTopIds() => _quotes.map((quote) => quote.id).toList();
 
   @override
-  List<QuoteEntry> quotesByAuthor(String author) => const [];
+  List<QuoteEntry> quotesByAuthor(String author) {
+    return _quotes.where((quote) => quote.author == author).toList();
+  }
 
   @override
-  List<QuoteEntry> searchQuotes(String query, {int limit = 24}) => const [];
+  List<QuoteEntry> searchQuotes(String query, {int limit = 24}) {
+    final normalized = query.trim().toLowerCase();
+    if (normalized.isEmpty) {
+      return const [];
+    }
+    return _quotes
+        .where(
+          (quote) =>
+              quote.text.toLowerCase().contains(normalized) ||
+              quote.author.toLowerCase().contains(normalized) ||
+              quote.tags.any((tag) => tag.toLowerCase().contains(normalized)),
+        )
+        .take(limit)
+        .toList();
+  }
 
   @override
   Future<void> saveProfile(UserProfile profile) async {
@@ -1077,6 +1183,21 @@ class _NoopQuoteActions implements QuoteActionsPort {
 
   @override
   Future<void> shareQuote(QuoteEntry quote) async {}
+}
+
+class _RecordingQuoteActions implements QuoteActionsPort {
+  int copyCount = 0;
+  int shareCount = 0;
+
+  @override
+  Future<void> copyQuote(QuoteEntry quote) async {
+    copyCount += 1;
+  }
+
+  @override
+  Future<void> shareQuote(QuoteEntry quote) async {
+    shareCount += 1;
+  }
 }
 
 class _NoopAppExit implements AppExitPort {
