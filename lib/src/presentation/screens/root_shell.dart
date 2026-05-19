@@ -3,17 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:wisely/src/application/state/wisely_controller.dart';
 import 'package:wisely/src/domain/entities/decompress_state.dart';
 import 'package:wisely/src/domain/entities/emotional_weather_point.dart';
+import 'package:wisely/src/domain/entities/journal_entry_filter.dart';
 import 'package:wisely/src/domain/entities/mood_journal_entry.dart';
 import 'package:wisely/src/domain/entities/mood_type.dart';
 import 'package:wisely/src/domain/entities/personalized_greeting.dart';
 import 'package:wisely/src/domain/entities/quote_entry.dart';
+import 'package:wisely/src/domain/entities/quote_feed_filter.dart';
 import 'package:wisely/src/domain/entities/user_profile.dart';
 import 'package:wisely/src/presentation/branding/silvator_mascot.dart';
 import 'package:wisely/src/presentation/theme/wisely_theme.dart';
@@ -652,7 +654,7 @@ class _DesktopShell extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.controller,
@@ -667,28 +669,36 @@ class HomeScreen extends StatelessWidget {
   final ValueChanged<QuoteEntry> onOpenDetails;
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  QuoteFeedFilter _feedFilter = QuoteFeedFilter.recommended;
+
+  @override
   Widget build(BuildContext context) {
+    final controller = widget.controller;
     final profile = controller.profile;
-    final currentQuote = controller.currentQuote;
     final quoteOfDay = controller.quoteOfDay;
     final accent = moodColors[controller.selectedMood]!;
     final selectedMoodLabel = _moodSelectionLabel(controller.selectedMoods);
-    final currentQuoteMood = currentQuote == null
-        ? controller.selectedMood
-        : controller.displayMoodForQuote(currentQuote);
+    final feedQuotes = controller.quoteFeed(
+      filter: _feedFilter,
+      limit: widget.showDesktopSearch ? 18 : 12,
+    );
     final phone = MediaQuery.sizeOf(context).width < 420;
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
-        showDesktopSearch ? 24 : (phone ? 16 : 20),
-        showDesktopSearch ? 20 : 16,
-        showDesktopSearch ? 24 : (phone ? 16 : 20),
-        showDesktopSearch ? 28 : 0,
+        widget.showDesktopSearch ? 24 : (phone ? 16 : 20),
+        widget.showDesktopSearch ? 20 : 16,
+        widget.showDesktopSearch ? 24 : (phone ? 16 : 20),
+        widget.showDesktopSearch ? 28 : 0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!showDesktopSearch)
+          if (!widget.showDesktopSearch)
             const _ScreenTopBar(
               title: 'Selvator',
               subtitle: '',
@@ -699,46 +709,28 @@ class HomeScreen extends StatelessWidget {
             greetingOverride: controller.greetingOverride,
             selectedMood: controller.selectedMood,
           ),
-          SizedBox(height: showDesktopSearch ? 18 : 24),
+          SizedBox(height: widget.showDesktopSearch ? 18 : 24),
           MoodChipRow(
             selectedMood: controller.selectedMood,
             selectedMoods: controller.selectedMoods,
             maxSelectedMoods: maxSelectedMoodSelections,
             onMoodSelected: controller.toggleMoodSelection,
           ),
-          SizedBox(height: showDesktopSearch ? 22 : 28),
-          if (currentQuote != null)
-            _QuoteSwitcher(
-              child: QuoteCard(
-                key: ValueKey<String>(
-                  'home-quote-${currentQuote.id}-${currentQuoteMood.name}',
-                ),
-                quote: currentQuote,
-                mood: currentQuoteMood,
-                isLiked: profile.likedQuoteIds.contains(currentQuote.id),
-                onLike: controller.toggleLike,
-                onCopy: controller.copyQuote,
-                onShare: controller.shareQuote,
-                onShowDetails: () => onOpenDetails(currentQuote),
-                onSendToWidget: controller.supportsHomeWidgets
-                    ? controller.sendCurrentQuoteToWidget
-                    : null,
-                onRefresh: controller.refreshQuote,
-                title: '$selectedMoodLabel quotes',
-                subtitle: 'Freshly matched to your selected mood mix.',
-                compact: showDesktopSearch,
-              ),
-            )
-          else
-            const _EmptyCard(
-              title: 'No quote yet',
-              message:
-                  'Pick one or more moods and Selvator will bring the right words forward.',
-            ),
-          if (!showDesktopSearch) ...[
+          SizedBox(height: widget.showDesktopSearch ? 22 : 28),
+          _HomeQuoteFeed(
+            quotes: feedQuotes,
+            filter: _feedFilter,
+            selectedMoodLabel: selectedMoodLabel,
+            profile: profile,
+            controller: controller,
+            compact: widget.showDesktopSearch,
+            onFilterChanged: (filter) => setState(() => _feedFilter = filter),
+            onOpenDetails: widget.onOpenDetails,
+          ),
+          if (!widget.showDesktopSearch) ...[
             const SizedBox(height: 22),
             _InsightGrid(
-              tablet: tablet,
+              tablet: widget.tablet,
               accent: accent,
               quoteOfDay: quoteOfDay,
               quoteOfDayLiked:
@@ -752,13 +744,338 @@ class HomeScreen extends StatelessWidget {
               onShareQuote: controller.shareQuote,
               onOpenQuoteOfDay: quoteOfDay == null
                   ? null
-                  : () => onOpenDetails(quoteOfDay),
+                  : () => widget.onOpenDetails(quoteOfDay),
             ),
           ],
         ],
       ),
     );
   }
+}
+
+class _HomeQuoteFeed extends StatelessWidget {
+  const _HomeQuoteFeed({
+    required this.quotes,
+    required this.filter,
+    required this.selectedMoodLabel,
+    required this.profile,
+    required this.controller,
+    required this.compact,
+    required this.onFilterChanged,
+    required this.onOpenDetails,
+  });
+
+  final List<QuoteEntry> quotes;
+  final QuoteFeedFilter filter;
+  final String selectedMoodLabel;
+  final UserProfile profile;
+  final WiselyController controller;
+  final bool compact;
+  final ValueChanged<QuoteFeedFilter> onFilterChanged;
+  final ValueChanged<QuoteEntry> onOpenDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final currentQuote = controller.currentQuote;
+    final phone = MediaQuery.sizeOf(context).width < 420;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: phone ? 360 : 520),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$selectedMoodLabel quotes',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _quoteFeedFilterDescription(filter),
+                    style: theme.textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: controller.refreshQuote,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('New quote'),
+            ),
+            if (controller.supportsHomeWidgets && currentQuote != null)
+              Tooltip(
+                message: 'Update Android home widget',
+                child: OutlinedButton.icon(
+                  onPressed: controller.sendCurrentQuoteToWidget,
+                  icon: const Icon(Icons.widgets_rounded),
+                  label: const Text('Update widget'),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final option in QuoteFeedFilter.values)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(_quoteFeedFilterLabel(option)),
+                    selected: filter == option,
+                    onSelected: (_) => onFilterChanged(option),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (quotes.isEmpty)
+          const _EmptyCard(
+            title: 'No quote yet',
+            message:
+                'Pick one or more moods and Selvator will bring the right words forward.',
+          )
+        else
+          for (var index = 0; index < quotes.length; index++) ...[
+            _QuoteFeedTile(
+              quote: quotes[index],
+              mood: controller.displayMoodForQuote(quotes[index]),
+              index: index,
+              filter: filter,
+              compact: compact,
+              isLiked: profile.likedQuoteIds.contains(quotes[index].id),
+              onLike: () => controller.toggleLike(quotes[index]),
+              onCopy: () => controller.copyQuote(quotes[index]),
+              onShare: () => controller.shareQuote(quotes[index]),
+              onShowDetails: () => onOpenDetails(quotes[index]),
+            ),
+            if (index != quotes.length - 1) const SizedBox(height: 12),
+          ],
+      ],
+    );
+  }
+}
+
+class _QuoteFeedTile extends StatelessWidget {
+  const _QuoteFeedTile({
+    required this.quote,
+    required this.mood,
+    required this.index,
+    required this.filter,
+    required this.compact,
+    required this.isLiked,
+    required this.onLike,
+    required this.onCopy,
+    required this.onShare,
+    required this.onShowDetails,
+  });
+
+  final QuoteEntry quote;
+  final MoodType mood;
+  final int index;
+  final QuoteFeedFilter filter;
+  final bool compact;
+  final bool isLiked;
+  final VoidCallback onLike;
+  final VoidCallback onCopy;
+  final VoidCallback onShare;
+  final VoidCallback onShowDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final accent = moodColors[mood]!;
+    final dark = context.isDarkMode;
+    final phone = MediaQuery.sizeOf(context).width < 420;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: context.glassSurfaceHigh(lightAlpha: 0.78, darkAlpha: 0.82),
+        borderRadius: BorderRadius.circular(phone ? 20 : 24),
+        border: Border.all(
+          color: index == 0
+              ? accent.withValues(alpha: dark ? 0.36 : 0.42)
+              : context.surfaceStroke(),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: dark
+                ? Colors.black.withValues(alpha: 0.16)
+                : accent.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(phone ? 20 : 24),
+          onTap: onShowDetails,
+          child: Padding(
+            padding: EdgeInsets.all(phone ? 16 : (compact ? 18 : 20)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    SilvatorMascotAvatar(mood: mood, width: 34, height: 34),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          _TinyPill(
+                            label: index == 0 ? 'Now' : mood.label,
+                            color: accent,
+                          ),
+                          _TinyPill(
+                            label: _quoteFeedMetaLabel(quote, mood, filter),
+                            color: theme.colorScheme.secondary,
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: isLiked ? 'Unsave quote' : 'Save quote',
+                      onPressed: onLike,
+                      icon: Icon(
+                        isLiked
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        color: isLiked
+                            ? const Color(0xFFDA5677)
+                            : theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '"${quote.text}"',
+                  maxLines: phone ? 5 : 4,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.lora(
+                    textStyle: theme.textTheme.titleLarge,
+                    height: 1.42,
+                    fontWeight: FontWeight.w500,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        quote.author,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Copy quote',
+                      onPressed: onCopy,
+                      icon: const Icon(Icons.copy_rounded),
+                    ),
+                    IconButton(
+                      tooltip: 'Share quote',
+                      onPressed: onShare,
+                      icon: const Icon(Icons.share_rounded),
+                    ),
+                    IconButton(
+                      tooltip: 'Quote details',
+                      onPressed: onShowDetails,
+                      icon: const Icon(Icons.open_in_new_rounded),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TinyPill extends StatelessWidget {
+  const _TinyPill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: context.isDarkMode ? 0.2 : 0.14),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: color.withValues(alpha: context.isDarkMode ? 0.28 : 0.22),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+String _quoteFeedFilterLabel(QuoteFeedFilter filter) => switch (filter) {
+  QuoteFeedFilter.recommended => 'Recommended',
+  QuoteFeedFilter.popular => 'Popular',
+  QuoteFeedFilter.fresh => 'Fresh',
+  QuoteFeedFilter.short => 'Short',
+  QuoteFeedFilter.deep => 'Deep',
+};
+
+String _quoteFeedFilterDescription(QuoteFeedFilter filter) => switch (filter) {
+  QuoteFeedFilter.recommended => 'Matched to your mood mix and recent taste.',
+  QuoteFeedFilter.popular => 'Highest popularity first.',
+  QuoteFeedFilter.fresh => 'Quotes you have seen least recently.',
+  QuoteFeedFilter.short => 'Quick reads for low-friction scrolling.',
+  QuoteFeedFilter.deep => 'More reflective lines for sitting with the mood.',
+};
+
+String _quoteFeedMetaLabel(
+  QuoteEntry quote,
+  MoodType mood,
+  QuoteFeedFilter filter,
+) {
+  return switch (filter) {
+    QuoteFeedFilter.popular =>
+      'Popularity ${NumberFormat.compact().format(quote.popularity)}',
+    QuoteFeedFilter.fresh => 'Fresh pick',
+    QuoteFeedFilter.short => '${quote.text.length} chars',
+    QuoteFeedFilter.deep =>
+      '${quote.effectiveArcTier(mood).name} · rhythm ${quote.rhythmScore}',
+    QuoteFeedFilter.recommended =>
+      '${quote.effectiveArcTier(mood).name} · ${mood.label}',
+  };
 }
 
 class JournalScreen extends StatelessWidget {
@@ -773,22 +1090,34 @@ class JournalScreen extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(phone ? 16 : 20, 16, phone ? 16 : 20, 16),
       children: [
         const _ScreenTopBar(
-          title: 'Mood Journal',
-          subtitle: 'Notes for the mood you are working with',
+          title: 'Safe Space',
+          subtitle: 'Private reflections for what you are carrying',
           icon: Icons.edit_note_rounded,
         ),
         const SizedBox(height: 18),
-        MoodChipRow(
+        _JournalSafeSpaceHeader(
+          selectedMoods: controller.selectedMoods,
           selectedMood: controller.selectedMood,
-          selectedMoods: [controller.selectedMood],
-          maxSelectedMoods: maxSelectedMoodSelections,
-          onMoodSelected: controller.selectMood,
         ),
         const SizedBox(height: 18),
-        _MoodJournalCard(
+        _GuidedJournalComposer(
           selectedMood: controller.selectedMood,
-          entries: controller.recentJournalEntries,
-          onSave: controller.saveMoodJournalNote,
+          selectedMoods: controller.selectedMoods,
+          onSave: controller.saveMoodJournalEntry,
+        ),
+        const SizedBox(height: 18),
+        _JournalTimelineFilters(
+          filter: controller.journalFilter,
+          moodFilter: controller.journalMoodFilter,
+          discreetMode: controller.journalDiscreetMode,
+          onFilterChanged: controller.setJournalFilter,
+          onMoodFilterChanged: controller.setJournalMoodFilter,
+          onDiscreetChanged: controller.setJournalDiscreetMode,
+        ),
+        const SizedBox(height: 18),
+        _JournalTimeline(
+          entries: controller.journalEntries,
+          discreetMode: controller.journalDiscreetMode,
           onDelete: controller.deleteMoodJournalEntry,
         ),
         const SizedBox(height: 18),
@@ -1345,107 +1674,153 @@ class _EmotionalWeatherChart extends StatelessWidget {
   }
 }
 
-class _QuoteSwitcher extends StatelessWidget {
-  const _QuoteSwitcher({required this.child});
+class _JournalSafeSpaceHeader extends StatelessWidget {
+  const _JournalSafeSpaceHeader({
+    required this.selectedMoods,
+    required this.selectedMood,
+  });
 
-  final Widget child;
+  final List<MoodType> selectedMoods;
+  final MoodType selectedMood;
 
   @override
   Widget build(BuildContext context) {
-    if (MediaQuery.disableAnimationsOf(context)) {
-      return child;
-    }
-
-    final switcher = AnimatedSwitcher(
-      duration: const Duration(milliseconds: 460),
-      reverseDuration: const Duration(milliseconds: 260),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
-      layoutBuilder: (currentChild, previousChildren) {
-        return Stack(
-          alignment: Alignment.topCenter,
-          children: [...previousChildren, ?currentChild],
-        );
-      },
-      transitionBuilder: (child, animation) {
-        final curved = CurvedAnimation(
-          parent: animation,
-          curve: Curves.easeOutCubic,
-          reverseCurve: Curves.easeInCubic,
-        );
-        return FadeTransition(
-          opacity: curved,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(0.02, 0.04),
-              end: Offset.zero,
-            ).animate(curved),
-            child: ScaleTransition(
-              scale: Tween<double>(begin: 0.975, end: 1).animate(curved),
-              child: child,
+    final accent = moodColors[selectedMood]!;
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: context.glassSurfaceHigh(lightAlpha: 0.86, darkAlpha: 0.88),
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: context.surfaceStroke()),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: SilvatorMascotAvatar(
+              mood: selectedMood,
+              width: 72,
+              height: 72,
+              semanticLabel: '${selectedMood.label} journal mascot',
             ),
           ),
-        );
-      },
-      child: child,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Write it without cleaning it up first.',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    height: 1.12,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'This stays on this device. Selvator will hold the page softly while you name what happened, what you felt, and what helped.',
+                  style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final mood in selectedMoods)
+                      _JournalMoodPill(mood: mood, selected: true),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
-    if (WidgetsBinding.instance.runtimeType.toString() ==
-        'AutomatedTestWidgetsFlutterBinding') {
-      return switcher;
-    }
-    return switcher
-        .animate()
-        .fadeIn(duration: 220.ms)
-        .slideY(begin: 0.015, end: 0);
   }
 }
 
-class _MoodJournalCard extends StatefulWidget {
-  const _MoodJournalCard({
+class _GuidedJournalComposer extends StatefulWidget {
+  const _GuidedJournalComposer({
     required this.selectedMood,
-    required this.entries,
+    required this.selectedMoods,
     required this.onSave,
-    required this.onDelete,
   });
 
   final MoodType selectedMood;
-  final List<MoodJournalEntry> entries;
-  final Future<void> Function(String note) onSave;
-  final Future<void> Function(String id) onDelete;
+  final List<MoodType> selectedMoods;
+  final Future<void> Function({
+    required String note,
+    String situation,
+    String feelings,
+    String handledWith,
+    String needNow,
+    String kindSelfTalk,
+  })
+  onSave;
 
   @override
-  State<_MoodJournalCard> createState() => _MoodJournalCardState();
+  State<_GuidedJournalComposer> createState() => _GuidedJournalComposerState();
 }
 
-class _MoodJournalCardState extends State<_MoodJournalCard> {
+class _GuidedJournalComposerState extends State<_GuidedJournalComposer> {
   final TextEditingController _noteController = TextEditingController();
-  final Set<String> _hiddenEntryIds = {};
+  final TextEditingController _situationController = TextEditingController();
+  final TextEditingController _feelingsController = TextEditingController();
+  final TextEditingController _handledWithController = TextEditingController();
+  final TextEditingController _needNowController = TextEditingController();
+  final TextEditingController _kindSelfTalkController = TextEditingController();
+  final Set<_JournalPrompt> _visiblePrompts = {};
   bool _saving = false;
 
-  bool get _canSave => _noteController.text.trim().isNotEmpty && !_saving;
+  bool get _hasAnyText {
+    return [
+      _noteController,
+      _situationController,
+      _feelingsController,
+      _handledWithController,
+      _needNowController,
+      _kindSelfTalkController,
+    ].any((controller) => controller.text.trim().isNotEmpty);
+  }
+
+  bool get _canSave => _hasAnyText && !_saving;
 
   @override
   void initState() {
     super.initState();
-    _noteController.addListener(_handleNoteChanged);
+    for (final controller in _controllers) {
+      controller.addListener(_handleChanged);
+    }
   }
 
-  @override
-  void didUpdateWidget(covariant _MoodJournalCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final currentIds = widget.entries.map((entry) => entry.id).toSet();
-    _hiddenEntryIds.removeWhere((id) => !currentIds.contains(id));
+  Iterable<TextEditingController> get _controllers sync* {
+    yield _noteController;
+    yield _situationController;
+    yield _feelingsController;
+    yield _handledWithController;
+    yield _needNowController;
+    yield _kindSelfTalkController;
   }
 
   @override
   void dispose() {
-    _noteController
-      ..removeListener(_handleNoteChanged)
-      ..dispose();
+    for (final controller in _controllers) {
+      controller
+        ..removeListener(_handleChanged)
+        ..dispose();
+    }
     super.dispose();
   }
 
-  void _handleNoteChanged() {
+  void _handleChanged() {
     setState(() {});
   }
 
@@ -1453,93 +1828,101 @@ class _MoodJournalCardState extends State<_MoodJournalCard> {
     if (!_canSave) {
       return;
     }
-    final note = _noteController.text;
-    setState(() {
-      _saving = true;
-    });
-    await widget.onSave(note);
+    setState(() => _saving = true);
+    await widget.onSave(
+      note: _noteController.text,
+      situation: _situationController.text,
+      feelings: _feelingsController.text,
+      handledWith: _handledWithController.text,
+      needNow: _needNowController.text,
+      kindSelfTalk: _kindSelfTalkController.text,
+    );
     if (!mounted) {
       return;
     }
-    _noteController.clear();
+    for (final controller in _controllers) {
+      controller.clear();
+    }
     setState(() {
       _saving = false;
+      _visiblePrompts.clear();
     });
-  }
-
-  Future<void> _delete(String id) async {
-    setState(() {
-      _hiddenEntryIds.add(id);
-    });
-    await widget.onDelete(id);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final accent = moodColors[widget.selectedMood]!;
-    final visibleEntries = widget.entries
-        .where((entry) => !_hiddenEntryIds.contains(entry.id))
-        .toList(growable: false);
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(22),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.16),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.antiAlias,
-                  child: SilvatorMascotAvatar(
-                    mood: widget.selectedMood,
-                    width: 42,
-                    height: 42,
-                    semanticLabel:
-                        '${widget.selectedMood.label} journal mascot',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Mood journal', style: theme.textTheme.titleLarge),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${widget.selectedMood.label} notes',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            Text('Safe-space entry', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 6),
+            Text(
+              'Start anywhere. Use the prompts only if they help.',
+              style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
             TextField(
               key: const Key('mood-journal-note-field'),
               controller: _noteController,
-              maxLength: 240,
-              maxLines: 3,
-              inputFormatters: [LengthLimitingTextInputFormatter(240)],
+              maxLength: 1200,
+              maxLines: 7,
+              minLines: 5,
+              inputFormatters: [LengthLimitingTextInputFormatter(1200)],
               decoration: const InputDecoration(
-                labelText: 'Journal note',
-                hintText: 'What stood out?',
+                labelText: 'Let it out',
+                hintText:
+                    'Say the messy part, the quiet part, or just a few words.',
+                alignLabelWithHint: true,
               ),
             ),
             const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final prompt in _JournalPrompt.values)
+                  FilterChip(
+                    label: Text(prompt.label),
+                    selected: _visiblePrompts.contains(prompt),
+                    onSelected: (_) {
+                      setState(() {
+                        if (!_visiblePrompts.add(prompt)) {
+                          _visiblePrompts.remove(prompt);
+                        }
+                      });
+                    },
+                  ),
+              ],
+            ),
+            if (_visiblePrompts.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              for (final prompt in _JournalPrompt.values)
+                if (_visiblePrompts.contains(prompt)) ...[
+                  _JournalPromptField(
+                    prompt: prompt,
+                    controller: _controllerForPrompt(prompt),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+            ],
+            const SizedBox(height: 4),
             Align(
               alignment: Alignment.centerRight,
               child: FilledButton.icon(
                 onPressed: _canSave ? _save : null,
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.isDarkMode
+                      ? const Color(0xFFE8C877)
+                      : accent,
+                  foregroundColor: context.isDarkMode
+                      ? const Color(0xFF1A1A14)
+                      : Colors.white,
+                ),
                 icon: _saving
                     ? const SizedBox(
                         width: 16,
@@ -1548,26 +1931,136 @@ class _MoodJournalCardState extends State<_MoodJournalCard> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Icon(Icons.save_rounded, size: 18),
+                    : const Icon(Icons.lock_rounded, size: 18),
                 label: const Text('Save note'),
               ),
             ),
-            const SizedBox(height: 18),
-            if (visibleEntries.isEmpty)
-              Text(
-                'No notes for ${widget.selectedMood.label.toLowerCase()} yet.',
-                style: theme.textTheme.bodyMedium,
-              )
-            else
-              Column(
+          ],
+        ),
+      ),
+    );
+  }
+
+  TextEditingController _controllerForPrompt(_JournalPrompt prompt) {
+    return switch (prompt) {
+      _JournalPrompt.situation => _situationController,
+      _JournalPrompt.feelings => _feelingsController,
+      _JournalPrompt.handledWith => _handledWithController,
+      _JournalPrompt.needNow => _needNowController,
+      _JournalPrompt.kindSelfTalk => _kindSelfTalkController,
+    };
+  }
+}
+
+class _JournalPromptField extends StatelessWidget {
+  const _JournalPromptField({required this.prompt, required this.controller});
+
+  final _JournalPrompt prompt;
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      key: Key('journal-prompt-${prompt.name}'),
+      controller: controller,
+      maxLength: 360,
+      maxLines: 3,
+      minLines: 2,
+      inputFormatters: [LengthLimitingTextInputFormatter(360)],
+      decoration: InputDecoration(
+        labelText: prompt.fieldLabel,
+        hintText: prompt.hint,
+        alignLabelWithHint: true,
+      ),
+    );
+  }
+}
+
+class _JournalTimelineFilters extends StatelessWidget {
+  const _JournalTimelineFilters({
+    required this.filter,
+    required this.moodFilter,
+    required this.discreetMode,
+    required this.onFilterChanged,
+    required this.onMoodFilterChanged,
+    required this.onDiscreetChanged,
+  });
+
+  final JournalEntryFilter filter;
+  final MoodType? moodFilter;
+  final bool discreetMode;
+  final ValueChanged<JournalEntryFilter> onFilterChanged;
+  final ValueChanged<MoodType?> onMoodFilterChanged;
+  final ValueChanged<bool> onDiscreetChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Journal timeline',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                Tooltip(
+                  message: 'Hide journal previews on cards',
+                  child: Switch.adaptive(
+                    value: discreetMode,
+                    onChanged: onDiscreetChanged,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final option in JournalEntryFilter.values)
+                  ChoiceChip(
+                    label: Text(_journalFilterLabel(option)),
+                    selected: filter == option,
+                    onSelected: (_) => onFilterChanged(option),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
                 children: [
-                  for (final entry in visibleEntries)
-                    _MoodJournalEntryTile(
-                      entry: entry,
-                      onDelete: () => _delete(entry.id),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: const Text('All moods'),
+                      selected: moodFilter == null,
+                      onSelected: (_) => onMoodFilterChanged(null),
+                    ),
+                  ),
+                  for (final mood in MoodType.values)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        avatar: SilvatorMascotAvatar(
+                          mood: mood,
+                          width: 22,
+                          height: 22,
+                        ),
+                        label: Text(mood.label),
+                        selected: moodFilter == mood,
+                        onSelected: (_) => onMoodFilterChanged(mood),
+                      ),
                     ),
                 ],
               ),
+            ),
           ],
         ),
       ),
@@ -1575,58 +2068,302 @@ class _MoodJournalCardState extends State<_MoodJournalCard> {
   }
 }
 
-class _MoodJournalEntryTile extends StatelessWidget {
-  const _MoodJournalEntryTile({required this.entry, required this.onDelete});
+class _JournalTimeline extends StatefulWidget {
+  const _JournalTimeline({
+    required this.entries,
+    required this.discreetMode,
+    required this.onDelete,
+  });
+
+  final List<MoodJournalEntry> entries;
+  final bool discreetMode;
+  final Future<void> Function(String id) onDelete;
+
+  @override
+  State<_JournalTimeline> createState() => _JournalTimelineState();
+}
+
+class _JournalTimelineState extends State<_JournalTimeline> {
+  final Set<String> _revealedEntryIds = {};
+  final Set<String> _hiddenEntryIds = {};
+
+  @override
+  void didUpdateWidget(covariant _JournalTimeline oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final currentIds = widget.entries.map((entry) => entry.id).toSet();
+    _revealedEntryIds.removeWhere((id) => !currentIds.contains(id));
+    _hiddenEntryIds.removeWhere((id) => !currentIds.contains(id));
+  }
+
+  Future<void> _delete(String id) async {
+    setState(() {
+      _hiddenEntryIds.add(id);
+      _revealedEntryIds.remove(id);
+    });
+    await widget.onDelete(id);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = widget.entries
+        .where((entry) => !_hiddenEntryIds.contains(entry.id))
+        .toList(growable: false);
+    if (entries.isEmpty) {
+      return const _EmptyCard(
+        title: 'No reflections here yet',
+        message: 'When you save something, it will appear here softly.',
+      );
+    }
+    return Column(
+      children: [
+        for (final entry in entries) ...[
+          _JournalEntryCard(
+            entry: entry,
+            revealed:
+                !widget.discreetMode || _revealedEntryIds.contains(entry.id),
+            onToggleReveal: () {
+              setState(() {
+                if (!_revealedEntryIds.add(entry.id)) {
+                  _revealedEntryIds.remove(entry.id);
+                }
+              });
+            },
+            onDelete: () => _delete(entry.id),
+          ),
+          const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+}
+
+class _JournalEntryCard extends StatelessWidget {
+  const _JournalEntryCard({
+    required this.entry,
+    required this.revealed,
+    required this.onToggleReveal,
+    required this.onDelete,
+  });
 
   final MoodJournalEntry entry;
+  final bool revealed;
+  final VoidCallback onToggleReveal;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accent = moodColors[entry.mood]!;
+    final accent = moodColors[entry.primaryMood]!;
     final timestamp = DateFormat('MMM d, h:mm a').format(entry.createdAt);
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 34,
-            height: 34,
-            decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.14),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            clipBehavior: Clip.antiAlias,
-            child: SilvatorMascotAvatar(
-              mood: entry.mood,
-              width: 34,
-              height: 34,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
+    return Container(
+      decoration: BoxDecoration(
+        color: context.glassSurfaceHigh(lightAlpha: 0.82, darkAlpha: 0.84),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: context.surfaceStroke()),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: onToggleReveal,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(entry.note, style: theme.textTheme.bodyLarge),
-                const SizedBox(height: 4),
-                Text(timestamp, style: theme.textTheme.bodySmall),
+                Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: SilvatorMascotAvatar(
+                        mood: entry.primaryMood,
+                        width: 42,
+                        height: 42,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _moodSelectionLabel(entry.moods),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(timestamp, style: theme.textTheme.bodySmall),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: revealed
+                          ? 'Hide reflection'
+                          : 'Reveal reflection',
+                      onPressed: onToggleReveal,
+                      icon: Icon(
+                        revealed
+                            ? Icons.visibility_off_rounded
+                            : Icons.visibility_rounded,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Delete note',
+                      onPressed: onDelete,
+                      icon: const Icon(Icons.delete_outline_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                if (!revealed)
+                  Text(
+                    'Private reflection saved',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  )
+                else
+                  _JournalEntryDetails(entry: entry),
               ],
             ),
           ),
-          IconButton(
-            tooltip: 'Delete note',
-            onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline_rounded),
-          ),
-        ],
+        ),
       ),
     );
   }
+}
+
+class _JournalEntryDetails extends StatelessWidget {
+  const _JournalEntryDetails({required this.entry});
+
+  final MoodJournalEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final sections = [
+      if (entry.note.trim().isNotEmpty)
+        (label: 'What I needed to say', text: entry.note),
+      if (entry.situation.trim().isNotEmpty)
+        (label: 'What happened', text: entry.situation),
+      if (entry.feelings.trim().isNotEmpty)
+        (label: 'What it made me feel', text: entry.feelings),
+      if (entry.handledWith.trim().isNotEmpty)
+        (label: 'How I dealt with it', text: entry.handledWith),
+      if (entry.needNow.trim().isNotEmpty)
+        (label: 'What I need now', text: entry.needNow),
+      if (entry.kindSelfTalk.trim().isNotEmpty)
+        (label: 'Kind words back', text: entry.kindSelfTalk),
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final section in sections) ...[
+          Text(
+            section.label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              letterSpacing: 0,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            section.text,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(height: 1.45),
+          ),
+          const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+}
+
+class _JournalMoodPill extends StatelessWidget {
+  const _JournalMoodPill({required this.mood, required this.selected});
+
+  final MoodType mood;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = moodColors[mood]!;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: selected ? 0.18 : 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: accent.withValues(alpha: 0.24)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SilvatorMascotAvatar(mood: mood, width: 20, height: 20),
+            const SizedBox(width: 6),
+            Text(
+              mood.label,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                letterSpacing: 0,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _JournalPrompt { situation, feelings, handledWith, needNow, kindSelfTalk }
+
+extension _JournalPromptText on _JournalPrompt {
+  String get label {
+    return switch (this) {
+      _JournalPrompt.situation => 'What happened?',
+      _JournalPrompt.feelings => 'What did it make you feel?',
+      _JournalPrompt.handledWith => 'How did you deal with it?',
+      _JournalPrompt.needNow => 'What do you need now?',
+      _JournalPrompt.kindSelfTalk => 'Kind words back',
+    };
+  }
+
+  String get fieldLabel {
+    return switch (this) {
+      _JournalPrompt.situation => 'What happened?',
+      _JournalPrompt.feelings => 'What did it make you feel?',
+      _JournalPrompt.handledWith => 'How did you deal with it?',
+      _JournalPrompt.needNow => 'What do you need now?',
+      _JournalPrompt.kindSelfTalk => 'What would you tell yourself kindly?',
+    };
+  }
+
+  String get hint {
+    return switch (this) {
+      _JournalPrompt.situation => 'Name the moment without judging it.',
+      _JournalPrompt.feelings =>
+        'A word, a sentence, or a messy list is enough.',
+      _JournalPrompt.handledWith => 'What did you do, avoid, try, or survive?',
+      _JournalPrompt.needNow => 'Rest, space, courage, help, food, a plan...',
+      _JournalPrompt.kindSelfTalk =>
+        'Say it like you would to someone you love.',
+    };
+  }
+}
+
+String _journalFilterLabel(JournalEntryFilter filter) {
+  return switch (filter) {
+    JournalEntryFilter.recent => 'Recent',
+    JournalEntryFilter.needNow => 'Need now',
+    JournalEntryFilter.handledWith => 'Handled with',
+  };
 }
 
 class FavoritesHistoryScreen extends StatefulWidget {
@@ -2555,114 +3292,131 @@ class _HeroStatement extends StatelessWidget {
       final wide = width >= 1100;
       final theme = Theme.of(context);
       final headlineSize = phone ? 34.0 : (wide ? 50.0 : 42.0);
+      final panelHeight = phone ? 214.0 : (wide ? 244.0 : 226.0);
       final salutationColor = context.isDarkMode
           ? const Color(0xFFF4D887)
           : const Color(0xFF8F6313);
-      return AnimatedSwitcher(
-        duration: MediaQuery.disableAnimationsOf(context)
-            ? Duration.zero
-            : const Duration(milliseconds: 360),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
-        child: KeyedSubtree(
-          key: ValueKey<String>(
-            '${greeting.salutation}-${greeting.headline}-${greetingOverride ?? ''}-${selectedMood.name}',
-          ),
-          child: AnimatedContainer(
-            duration: MediaQuery.disableAnimationsOf(context)
-                ? Duration.zero
-                : const Duration(milliseconds: 360),
-            curve: Curves.easeOutCubic,
-            padding: EdgeInsets.fromLTRB(
-              phone ? 18 : 24,
-              phone ? 18 : 22,
-              phone ? 18 : 26,
-              phone ? 20 : 26,
+      return SizedBox(
+        width: double.infinity,
+        height: panelHeight,
+        child: AnimatedSwitcher(
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 360),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          child: KeyedSubtree(
+            key: ValueKey<String>(
+              '${greeting.salutation}-${greeting.headline}-${greetingOverride ?? ''}-${selectedMood.name}',
             ),
-            decoration: BoxDecoration(
-              color: context.glassSurface(lightAlpha: 0.5, darkAlpha: 0.34),
-              borderRadius: BorderRadius.circular(phone ? 28 : 36),
-              border: Border.all(
-                color: accent.withValues(
-                  alpha: context.isDarkMode ? 0.28 : 0.32,
-                ),
+            child: AnimatedContainer(
+              width: double.infinity,
+              height: panelHeight,
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 360),
+              curve: Curves.easeOutCubic,
+              padding: EdgeInsets.fromLTRB(
+                phone ? 18 : 24,
+                phone ? 18 : 22,
+                phone ? 18 : 26,
+                phone ? 20 : 26,
               ),
-              boxShadow: [
-                BoxShadow(
+              decoration: BoxDecoration(
+                color: context.glassSurface(lightAlpha: 0.5, darkAlpha: 0.34),
+                borderRadius: BorderRadius.circular(phone ? 28 : 36),
+                border: Border.all(
                   color: accent.withValues(
-                    alpha: context.isDarkMode ? 0.08 : 0.16,
+                    alpha: context.isDarkMode ? 0.28 : 0.32,
                   ),
-                  blurRadius: phone ? 26 : 42,
-                  offset: const Offset(0, 20),
                 ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: context.accentSurface(accent, lightAlpha: 0.15),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: accent.withValues(
-                        alpha: context.isDarkMode ? 0.26 : 0.22,
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(
+                      alpha: context.isDarkMode ? 0.08 : 0.16,
+                    ),
+                    blurRadius: phone ? 26 : 42,
+                    offset: const Offset(0, 20),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: phone ? 38 : 42,
+                    width: double.infinity,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: context.accentSurface(accent, lightAlpha: 0.15),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(
+                          color: accent.withValues(
+                            alpha: context.isDarkMode ? 0.26 : 0.22,
+                          ),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: phone ? 12 : 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 9,
+                              height: 9,
+                              decoration: BoxDecoration(
+                                color: accent,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: accent.withValues(alpha: 0.42),
+                                    blurRadius: 12,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 9),
+                            Expanded(
+                              child: Text(
+                                greeting.salutation,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: salutationColor,
+                                  fontSize: phone ? 17 : 19,
+                                  fontWeight: FontWeight.w800,
+                                  height: 1.05,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: phone ? 12 : 14,
-                      vertical: phone ? 7 : 8,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 9,
-                          height: 9,
-                          decoration: BoxDecoration(
-                            color: accent,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: accent.withValues(alpha: 0.42),
-                                blurRadius: 12,
-                              ),
-                            ],
-                          ),
+                  SizedBox(height: phone ? 14 : 16),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        greeting.headline,
+                        maxLines: phone ? 3 : 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.displayMedium?.copyWith(
+                          fontSize: headlineSize,
+                          fontWeight: FontWeight.w800,
+                          height: 1.04,
+                          letterSpacing: 0,
+                          color: context.isDarkMode
+                              ? const Color(0xFFF4F1F7)
+                              : const Color(0xFF24272C),
                         ),
-                        const SizedBox(width: 9),
-                        Flexible(
-                          child: Text(
-                            greeting.salutation,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: salutationColor,
-                              fontSize: phone ? 17 : 19,
-                              fontWeight: FontWeight.w800,
-                              height: 1.05,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  greeting.headline,
-                  style: theme.textTheme.displayMedium?.copyWith(
-                    fontSize: headlineSize,
-                    fontWeight: FontWeight.w800,
-                    height: 1.04,
-                    letterSpacing: 0,
-                    color: context.isDarkMode
-                        ? const Color(0xFFF4F1F7)
-                        : const Color(0xFF24272C),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -1,15 +1,19 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wisely/src/application/ports/platform_ports.dart';
 import 'package:wisely/src/domain/entities/decompress_state.dart';
 import 'package:wisely/src/domain/entities/emotional_weather_point.dart';
+import 'package:wisely/src/domain/entities/journal_entry_filter.dart';
 import 'package:wisely/src/domain/entities/mood_energy.dart';
 import 'package:wisely/src/domain/entities/mood_journal_entry.dart';
 import 'package:wisely/src/domain/entities/mood_type.dart';
 import 'package:wisely/src/domain/entities/personalized_greeting.dart';
+import 'package:wisely/src/domain/entities/quote_arc_tier.dart';
 import 'package:wisely/src/domain/entities/quote_entry.dart';
+import 'package:wisely/src/domain/entities/quote_feed_filter.dart';
 import 'package:wisely/src/domain/entities/session_models.dart';
 import 'package:wisely/src/domain/entities/tide_season.dart';
 import 'package:wisely/src/domain/entities/time_bucket.dart';
@@ -106,6 +110,10 @@ class WiselyState {
     required this.sessionState,
     required this.sessionAggregates,
     required this.recentJournalEntries,
+    required this.journalEntries,
+    required this.journalFilter,
+    required this.journalMoodFilter,
+    required this.journalDiscreetMode,
     required this.pendingQuote,
     required this.pendingQuoteMood,
     required this.pendingQuoteSyncWidget,
@@ -136,6 +144,10 @@ class WiselyState {
   final SessionState sessionState;
   final SessionAggregates sessionAggregates;
   final List<MoodJournalEntry> recentJournalEntries;
+  final List<MoodJournalEntry> journalEntries;
+  final JournalEntryFilter journalFilter;
+  final MoodType? journalMoodFilter;
+  final bool journalDiscreetMode;
   final QuoteEntry? pendingQuote;
   final MoodType? pendingQuoteMood;
   final bool pendingQuoteSyncWidget;
@@ -173,6 +185,10 @@ class WiselyState {
       sessionState: SessionState.initial(MoodType.happy, now),
       sessionAggregates: SessionAggregates.initial(),
       recentJournalEntries: const [],
+      journalEntries: const [],
+      journalFilter: JournalEntryFilter.recent,
+      journalMoodFilter: null,
+      journalDiscreetMode: true,
       pendingQuote: null,
       pendingQuoteMood: null,
       pendingQuoteSyncWidget: false,
@@ -205,6 +221,10 @@ class WiselyState {
     SessionState? sessionState,
     SessionAggregates? sessionAggregates,
     List<MoodJournalEntry>? recentJournalEntries,
+    List<MoodJournalEntry>? journalEntries,
+    JournalEntryFilter? journalFilter,
+    Object? journalMoodFilter = _unset,
+    bool? journalDiscreetMode,
     Object? pendingQuote = _unset,
     Object? pendingQuoteMood = _unset,
     bool? pendingQuoteSyncWidget,
@@ -245,6 +265,12 @@ class WiselyState {
       sessionState: sessionState ?? this.sessionState,
       sessionAggregates: sessionAggregates ?? this.sessionAggregates,
       recentJournalEntries: recentJournalEntries ?? this.recentJournalEntries,
+      journalEntries: journalEntries ?? this.journalEntries,
+      journalFilter: journalFilter ?? this.journalFilter,
+      journalMoodFilter: journalMoodFilter == _unset
+          ? this.journalMoodFilter
+          : journalMoodFilter as MoodType?,
+      journalDiscreetMode: journalDiscreetMode ?? this.journalDiscreetMode,
       pendingQuote: pendingQuote == _unset
           ? this.pendingQuote
           : pendingQuote as QuoteEntry?,
@@ -304,6 +330,10 @@ class WiselyController extends Notifier<WiselyState> {
   SessionState get sessionState => state.sessionState;
   SessionAggregates get sessionAggregates => state.sessionAggregates;
   List<MoodJournalEntry> get recentJournalEntries => state.recentJournalEntries;
+  List<MoodJournalEntry> get journalEntries => state.journalEntries;
+  JournalEntryFilter get journalFilter => state.journalFilter;
+  MoodType? get journalMoodFilter => state.journalMoodFilter;
+  bool get journalDiscreetMode => state.journalDiscreetMode;
   bool get isDecompressing => state.isDecompressing;
   QuoteEntry? get pendingQuote => state.pendingQuote;
   MoodType? get pendingQuoteMood => state.pendingQuoteMood;
@@ -376,7 +406,11 @@ class WiselyController extends Notifier<WiselyState> {
         echoDecompressionRequired: echo.shouldDecompress,
         sessionState: SessionState.initial(selectedMood, now),
         sessionAggregates: _repository.sessionAggregates,
-        recentJournalEntries: _recentJournalEntries(selectedMood),
+        recentJournalEntries: _recentJournalEntries(selectedMoods),
+        journalEntries: _journalEntries(
+          filter: state.journalFilter,
+          mood: state.journalMoodFilter,
+        ),
         emotionalWeather: _emotionalWeather(profile),
       );
 
@@ -451,7 +485,11 @@ class WiselyController extends Notifier<WiselyState> {
         mood: selectedMood,
         now: now,
       ),
-      recentJournalEntries: _recentJournalEntries(selectedMood),
+      recentJournalEntries: _recentJournalEntries(normalizedPreferences),
+      journalEntries: _journalEntries(
+        filter: state.journalFilter,
+        mood: state.journalMoodFilter,
+      ),
       emotionalWeather: _emotionalWeather(profile),
     );
     await _selectQuote(
@@ -487,7 +525,11 @@ class WiselyController extends Notifier<WiselyState> {
       timeBucket: _clockService.bucketFor(now),
       tideSeason: profile.tideSeason,
       echoDecompressionRequired: _echoGuard.evaluate(profile).shouldDecompress,
-      recentJournalEntries: _recentJournalEntries(mood),
+      recentJournalEntries: _recentJournalEntries([mood]),
+      journalEntries: _journalEntries(
+        filter: state.journalFilter,
+        mood: state.journalMoodFilter,
+      ),
       emotionalWeather: _emotionalWeather(profile),
     );
     await _selectQuote(
@@ -530,7 +572,11 @@ class WiselyController extends Notifier<WiselyState> {
       timeBucket: _clockService.bucketFor(now),
       tideSeason: profile.tideSeason,
       echoDecompressionRequired: _echoGuard.evaluate(profile).shouldDecompress,
-      recentJournalEntries: _recentJournalEntries(primaryMood),
+      recentJournalEntries: _recentJournalEntries(orderedMoods),
+      journalEntries: _journalEntries(
+        filter: state.journalFilter,
+        mood: state.journalMoodFilter,
+      ),
       emotionalWeather: _emotionalWeather(profile),
     );
     await _selectQuote(
@@ -661,6 +707,10 @@ class WiselyController extends Notifier<WiselyState> {
       sessionState: SessionState.initial(selectedMood, DateTime.now()),
       sessionAggregates: _repository.sessionAggregates,
       recentJournalEntries: const [],
+      journalEntries: const [],
+      journalFilter: JournalEntryFilter.recent,
+      journalMoodFilter: null,
+      journalDiscreetMode: true,
       timeBucket: _clockService.bucketFor(DateTime.now()),
       tideSeason: TideSeason.still,
       pendingQuote: null,
@@ -676,13 +726,38 @@ class WiselyController extends Notifier<WiselyState> {
   }
 
   Future<void> saveMoodJournalNote(String note) async {
-    final trimmed = note.trim();
-    if (trimmed.isEmpty) {
+    await saveMoodJournalEntry(note: note);
+  }
+
+  Future<void> saveMoodJournalEntry({
+    required String note,
+    String situation = '',
+    String feelings = '',
+    String handledWith = '',
+    String needNow = '',
+    String kindSelfTalk = '',
+  }) async {
+    final trimmedFields = [
+      note,
+      situation,
+      feelings,
+      handledWith,
+      needNow,
+      kindSelfTalk,
+    ].map((value) => value.trim()).toList(growable: false);
+    if (trimmedFields.every((value) => value.isEmpty)) {
       return;
     }
+    final selectedMoods = _activeMoodSelection();
     await _moodJournalRepository.saveEntry(
-      mood: state.selectedMood,
-      note: trimmed,
+      mood: selectedMoods.first,
+      moods: selectedMoods,
+      note: trimmedFields[0],
+      situation: trimmedFields[1],
+      feelings: trimmedFields[2],
+      handledWith: trimmedFields[3],
+      needNow: trimmedFields[4],
+      kindSelfTalk: trimmedFields[5],
     );
     _refreshJournalEntries();
   }
@@ -690,6 +765,27 @@ class WiselyController extends Notifier<WiselyState> {
   Future<void> deleteMoodJournalEntry(String id) async {
     await _moodJournalRepository.deleteEntry(id);
     _refreshJournalEntries();
+  }
+
+  void setJournalFilter(JournalEntryFilter filter) {
+    state = state.copyWith(
+      journalFilter: filter,
+      journalEntries: _journalEntries(
+        filter: filter,
+        mood: state.journalMoodFilter,
+      ),
+    );
+  }
+
+  void setJournalMoodFilter(MoodType? mood) {
+    state = state.copyWith(
+      journalMoodFilter: mood,
+      journalEntries: _journalEntries(filter: state.journalFilter, mood: mood),
+    );
+  }
+
+  void setJournalDiscreetMode(bool value) {
+    state = state.copyWith(journalDiscreetMode: value);
   }
 
   Future<void> setSelectedTab(int index) async {
@@ -727,6 +823,89 @@ class WiselyController extends Notifier<WiselyState> {
             .toList()
           ..sort((a, b) => b.popularity.compareTo(a.popularity));
     return liked;
+  }
+
+  List<QuoteEntry> quoteFeed({
+    QuoteFeedFilter filter = QuoteFeedFilter.recommended,
+    int limit = 18,
+  }) {
+    final selectedMoods = _activeMoodSelection();
+    final candidates = _repository.allQuotes
+        .where((quote) => _quoteMatchesAnyMood(quote, selectedMoods))
+        .toList();
+
+    if (candidates.isEmpty) {
+      final fallback = <QuoteEntry>[
+        ?state.currentQuote,
+        ..._repository.allQuotes.take(limit),
+      ];
+      return _uniqueQuotes(fallback).take(limit).toList(growable: false);
+    }
+
+    switch (filter) {
+      case QuoteFeedFilter.recommended:
+        candidates.sort(
+          (a, b) => _feedRecommendationScore(
+            b,
+            selectedMoods,
+          ).compareTo(_feedRecommendationScore(a, selectedMoods)),
+        );
+        return _uniqueQuotes([
+          ?state.currentQuote,
+          ...state.currentQuoteArc,
+          ...candidates,
+        ]).take(limit).toList(growable: false);
+      case QuoteFeedFilter.popular:
+        candidates.sort((a, b) => b.popularity.compareTo(a.popularity));
+        break;
+      case QuoteFeedFilter.fresh:
+        candidates.sort((a, b) {
+          final aSeen = state.profile.lastShownAtByQuoteId[a.id];
+          final bSeen = state.profile.lastShownAtByQuoteId[b.id];
+          if (aSeen == null && bSeen != null) {
+            return -1;
+          }
+          if (aSeen != null && bSeen == null) {
+            return 1;
+          }
+          if (aSeen != null && bSeen != null && aSeen != bSeen) {
+            return aSeen.compareTo(bSeen);
+          }
+          return b.popularity.compareTo(a.popularity);
+        });
+        break;
+      case QuoteFeedFilter.short:
+        candidates.sort((a, b) {
+          final lengthCompare = a.text.length.compareTo(b.text.length);
+          if (lengthCompare != 0) {
+            return lengthCompare;
+          }
+          return b.popularity.compareTo(a.popularity);
+        });
+        break;
+      case QuoteFeedFilter.deep:
+        candidates.sort((a, b) {
+          final tierCompare = _deepTierRank(
+            a,
+            selectedMoods,
+          ).compareTo(_deepTierRank(b, selectedMoods));
+          if (tierCompare != 0) {
+            return tierCompare;
+          }
+          final rhythmCompare = a.rhythmScore.compareTo(b.rhythmScore);
+          if (rhythmCompare != 0) {
+            return rhythmCompare;
+          }
+          final lengthCompare = b.text.length.compareTo(a.text.length);
+          if (lengthCompare != 0) {
+            return lengthCompare;
+          }
+          return b.popularity.compareTo(a.popularity);
+        });
+        break;
+    }
+
+    return _uniqueQuotes(candidates).take(limit).toList(growable: false);
   }
 
   List<QuoteEntry> authorQuotes(String author) =>
@@ -798,12 +977,88 @@ class WiselyController extends Notifier<WiselyState> {
 
   void _refreshJournalEntries() {
     state = state.copyWith(
-      recentJournalEntries: _recentJournalEntries(state.selectedMood),
+      recentJournalEntries: _recentJournalEntries(_activeMoodSelection()),
+      journalEntries: _journalEntries(
+        filter: state.journalFilter,
+        mood: state.journalMoodFilter,
+      ),
     );
   }
 
-  List<MoodJournalEntry> _recentJournalEntries(MoodType mood) {
-    return _moodJournalRepository.recentEntries(mood: mood);
+  List<MoodJournalEntry> _recentJournalEntries(List<MoodType> moods) {
+    return _moodJournalRepository.entries(moods: moods, limit: 5);
+  }
+
+  List<MoodJournalEntry> _journalEntries({
+    required JournalEntryFilter filter,
+    MoodType? mood,
+  }) {
+    return _moodJournalRepository.entries(
+      moods: mood == null ? null : [mood],
+      filter: filter,
+      limit: 80,
+    );
+  }
+
+  bool _quoteMatchesAnyMood(QuoteEntry quote, List<MoodType> moods) {
+    return moods.any(
+      (mood) =>
+          quote.belongsToMood(mood) || (quote.moodStrength[mood] ?? 0) > 0.25,
+    );
+  }
+
+  Iterable<QuoteEntry> _uniqueQuotes(Iterable<QuoteEntry> quotes) sync* {
+    final seen = <String>{};
+    for (final quote in quotes) {
+      if (seen.add(quote.id)) {
+        yield quote;
+      }
+    }
+  }
+
+  double _feedRecommendationScore(QuoteEntry quote, List<MoodType> moods) {
+    final moodStrength = moods
+        .map((mood) => quote.moodStrength[mood] ?? 0.0)
+        .fold<double>(0, max);
+    final likedTagOverlap = quote.tags
+        .where(state.profile.likedTagCounts.containsKey)
+        .length
+        .toDouble();
+    final preferenceScore = quote.tags.fold<double>(
+      0,
+      (sum, tag) => sum + (state.profile.tagPreferenceWeights[tag] ?? 0),
+    );
+    final freshnessBoost = state.profile.lastShownQuoteIds.contains(quote.id)
+        ? -25.0
+        : 35.0;
+    final tierBoost = moods
+        .map(
+          (mood) => switch (quote.effectiveArcTier(mood)) {
+            QuoteArcTier.mirror => 18.0,
+            QuoteArcTier.bridge => 26.0,
+            QuoteArcTier.window => 22.0,
+          },
+        )
+        .fold<double>(0, max);
+
+    return (moodStrength * 900) +
+        (quote.popularity / 10000) +
+        (likedTagOverlap * 28) +
+        (preferenceScore.clamp(-0.4, 1.2) * 70) +
+        freshnessBoost +
+        tierBoost;
+  }
+
+  int _deepTierRank(QuoteEntry quote, List<MoodType> moods) {
+    return moods
+        .map(
+          (mood) => switch (quote.effectiveArcTier(mood)) {
+            QuoteArcTier.mirror => 0,
+            QuoteArcTier.bridge => 1,
+            QuoteArcTier.window => 2,
+          },
+        )
+        .fold<int>(2, min);
   }
 
   PersonalizedGreeting _greetingFor(UserProfile profile, MoodType mood) {
@@ -880,7 +1135,10 @@ class WiselyController extends Notifier<WiselyState> {
     );
     final shouldDecompress =
         !forceGlobalTop &&
-        _requiresDecompression(selectedMoods, state.echoDecompressionRequired);
+        _requiresDecompression(
+          primaryMood: selectedMood,
+          echoRequired: state.echoDecompressionRequired,
+        );
     state = state.copyWith(
       profile: profile,
       currentQuote: shouldDecompress ? null : quote,
@@ -941,9 +1199,11 @@ class WiselyController extends Notifier<WiselyState> {
     });
   }
 
-  bool _requiresDecompression(List<MoodType> selectedMoods, bool echoRequired) {
-    return echoRequired ||
-        selectedMoods.any((mood) => mood.requiresDecompression);
+  bool _requiresDecompression({
+    required MoodType primaryMood,
+    required bool echoRequired,
+  }) {
+    return echoRequired || primaryMood.requiresDecompression;
   }
 
   List<EmotionalWeatherPoint> _emotionalWeather(UserProfile profile) {

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wisely/src/application/ports/platform_ports.dart';
 import 'package:wisely/src/application/state/wisely_controller.dart';
 import 'package:wisely/src/domain/entities/catalog_version.dart';
+import 'package:wisely/src/domain/entities/journal_entry_filter.dart';
 import 'package:wisely/src/domain/entities/mood_journal_entry.dart';
 import 'package:wisely/src/domain/entities/mood_type.dart';
 import 'package:wisely/src/domain/entities/personalized_greeting.dart';
@@ -58,13 +59,88 @@ void main() {
           .saveMoodJournalNote('  Today felt lighter.  ');
 
       final state = container.read(wiselyControllerProvider);
-      expect(journalRepository.entries, hasLength(1));
-      expect(journalRepository.entries.single.note, 'Today felt lighter.');
-      expect(journalRepository.entries.single.mood, MoodType.happy);
+      expect(journalRepository.storedEntries, hasLength(1));
+      expect(
+        journalRepository.storedEntries.single.note,
+        'Today felt lighter.',
+      );
+      expect(journalRepository.storedEntries.single.mood, MoodType.happy);
       expect(state.recentJournalEntries, hasLength(1));
+      expect(state.journalEntries, hasLength(1));
       expect(state.recentJournalEntries.single.note, 'Today felt lighter.');
     },
   );
+
+  test('saveMoodJournalEntry saves mood mix and structured fields', () async {
+    final journalRepository = _FakeMoodJournalRepository();
+    final container = ProviderContainer(
+      overrides: [
+        quoteRepositoryProvider.overrideWithValue(_FakeQuoteRepository()),
+        moodJournalRepositoryProvider.overrideWithValue(journalRepository),
+        quoteWidgetPortProvider.overrideWithValue(_FakeQuoteWidget()),
+        trayPortProvider.overrideWithValue(_FakeTray()),
+        quoteActionsPortProvider.overrideWithValue(_FakeQuoteActions()),
+        appExitPortProvider.overrideWithValue(_FakeAppExit()),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final controller = container.read(wiselyControllerProvider.notifier);
+    await controller.toggleMoodSelection(MoodType.calm);
+    await controller.saveMoodJournalEntry(
+      note: '  ',
+      situation: '  Work got loud  ',
+      feelings: '  tense  ',
+      handledWith: '  took a walk  ',
+      needNow: '  quiet  ',
+      kindSelfTalk: '  I can slow down  ',
+    );
+
+    final entry = journalRepository.storedEntries.single;
+    final state = container.read(wiselyControllerProvider);
+    expect(entry.primaryMood, MoodType.calm);
+    expect(entry.moods, containsAll([MoodType.happy, MoodType.calm]));
+    expect(entry.note, isEmpty);
+    expect(entry.situation, 'Work got loud');
+    expect(entry.feelings, 'tense');
+    expect(entry.handledWith, 'took a walk');
+    expect(entry.needNow, 'quiet');
+    expect(entry.kindSelfTalk, 'I can slow down');
+    expect(state.recentJournalEntries.single.id, entry.id);
+  });
+
+  test('journal filters return matching entries', () async {
+    final journalRepository = _FakeMoodJournalRepository();
+    final container = ProviderContainer(
+      overrides: [
+        quoteRepositoryProvider.overrideWithValue(_FakeQuoteRepository()),
+        moodJournalRepositoryProvider.overrideWithValue(journalRepository),
+        quoteWidgetPortProvider.overrideWithValue(_FakeQuoteWidget()),
+        trayPortProvider.overrideWithValue(_FakeTray()),
+        quoteActionsPortProvider.overrideWithValue(_FakeQuoteActions()),
+        appExitPortProvider.overrideWithValue(_FakeAppExit()),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final controller = container.read(wiselyControllerProvider.notifier);
+    await controller.saveMoodJournalEntry(note: 'plain');
+    await controller.saveMoodJournalEntry(note: '', needNow: 'space');
+    await controller.saveMoodJournalEntry(
+      note: '',
+      handledWith: 'called a friend',
+    );
+
+    controller.setJournalFilter(JournalEntryFilter.needNow);
+    var state = container.read(wiselyControllerProvider);
+    expect(state.journalEntries.map((entry) => entry.needNow), ['space']);
+
+    controller.setJournalFilter(JournalEntryFilter.handledWith);
+    state = container.read(wiselyControllerProvider);
+    expect(state.journalEntries.map((entry) => entry.handledWith), [
+      'called a friend',
+    ]);
+  });
 
   test('blank journal notes are ignored and delete refreshes state', () async {
     final journalRepository = _FakeMoodJournalRepository();
@@ -83,7 +159,8 @@ void main() {
     final controller = container.read(wiselyControllerProvider.notifier);
 
     await controller.saveMoodJournalNote('   ');
-    expect(journalRepository.entries, isEmpty);
+    await controller.saveMoodJournalEntry(note: ' ', situation: ' ');
+    expect(journalRepository.storedEntries, isEmpty);
 
     await controller.saveMoodJournalNote('Keep this');
     final entryId = container
@@ -219,6 +296,42 @@ void main() {
     expect(state.isDecompressing, isFalse);
     expect(state.currentQuote, isNotNull);
   });
+
+  test('secondary low mood does not keep decompression active', () async {
+    final quoteRepository = _FakeQuoteRepository();
+    final container = ProviderContainer(
+      overrides: [
+        quoteRepositoryProvider.overrideWithValue(quoteRepository),
+        moodJournalRepositoryProvider.overrideWithValue(
+          _FakeMoodJournalRepository(),
+        ),
+        quoteWidgetPortProvider.overrideWithValue(_FakeQuoteWidget()),
+        trayPortProvider.overrideWithValue(_FakeTray()),
+        quoteActionsPortProvider.overrideWithValue(_FakeQuoteActions()),
+        appExitPortProvider.overrideWithValue(_FakeAppExit()),
+      ],
+    );
+    addTearDown(container.dispose);
+
+    final controller = container.read(wiselyControllerProvider.notifier);
+    await controller.completeOnboarding(
+      displayName: 'Mona',
+      gender: UserGender.female,
+      preferredMoods: const [MoodType.tired],
+    );
+
+    var state = container.read(wiselyControllerProvider);
+    expect(state.isDecompressing, isTrue);
+
+    await controller.toggleMoodSelection(MoodType.calm);
+
+    state = container.read(wiselyControllerProvider);
+    expect(state.selectedMood, MoodType.calm);
+    expect(state.selectedMoods, contains(MoodType.tired));
+    expect(state.isDecompressing, isFalse);
+    expect(state.currentQuote, isNotNull);
+    expect(state.pendingQuote, isNull);
+  });
 }
 
 class _FakeQuoteRepository implements QuoteRepository {
@@ -314,7 +427,7 @@ QuoteEntry _quote(String id, MoodType mood) {
 }
 
 class _FakeMoodJournalRepository implements MoodJournalRepository {
-  final List<MoodJournalEntry> entries = [];
+  final List<MoodJournalEntry> storedEntries = [];
 
   @override
   Future<void> initialize() async {}
@@ -322,23 +435,69 @@ class _FakeMoodJournalRepository implements MoodJournalRepository {
   @override
   List<MoodJournalEntry> recentEntries({MoodType? mood, int limit = 5}) {
     final filtered =
-        entries.where((entry) => mood == null || entry.mood == mood).toList()
+        storedEntries
+            .where((entry) => mood == null || entry.moods.contains(mood))
+            .toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return filtered.take(limit).toList(growable: false);
   }
 
   @override
-  Future<void> saveEntry({required MoodType mood, required String note}) async {
-    final trimmed = note.trim();
-    if (trimmed.isEmpty) {
+  List<MoodJournalEntry> entries({
+    List<MoodType>? moods,
+    JournalEntryFilter filter = JournalEntryFilter.recent,
+    int limit = 50,
+  }) {
+    final moodSet = moods?.toSet() ?? const <MoodType>{};
+    final filtered = storedEntries.where((entry) {
+      final moodMatches =
+          moodSet.isEmpty || entry.moods.any((mood) => moodSet.contains(mood));
+      if (!moodMatches) {
+        return false;
+      }
+      return switch (filter) {
+        JournalEntryFilter.recent => true,
+        JournalEntryFilter.needNow => entry.hasNeedNow,
+        JournalEntryFilter.handledWith => entry.hasHandledWith,
+      };
+    }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return filtered.take(limit).toList(growable: false);
+  }
+
+  @override
+  Future<void> saveEntry({
+    required MoodType mood,
+    List<MoodType>? moods,
+    required String note,
+    String situation = '',
+    String feelings = '',
+    String handledWith = '',
+    String needNow = '',
+    String kindSelfTalk = '',
+  }) async {
+    final values = [
+      note,
+      situation,
+      feelings,
+      handledWith,
+      needNow,
+      kindSelfTalk,
+    ].map((value) => value.trim()).toList(growable: false);
+    if (values.every((value) => value.isEmpty)) {
       return;
     }
     final now = DateTime.now();
-    entries.add(
+    storedEntries.add(
       MoodJournalEntry(
-        id: 'entry-${entries.length}',
-        mood: mood,
-        note: trimmed,
+        id: 'entry-${storedEntries.length}',
+        primaryMood: mood,
+        moods: moods,
+        note: values[0],
+        situation: values[1],
+        feelings: values[2],
+        handledWith: values[3],
+        needNow: values[4],
+        kindSelfTalk: values[5],
         createdAt: now,
         updatedAt: now,
       ),
@@ -347,12 +506,12 @@ class _FakeMoodJournalRepository implements MoodJournalRepository {
 
   @override
   Future<void> deleteEntry(String id) async {
-    entries.removeWhere((entry) => entry.id == id);
+    storedEntries.removeWhere((entry) => entry.id == id);
   }
 
   @override
   Future<void> clearEntries() async {
-    entries.clear();
+    storedEntries.clear();
   }
 }
 

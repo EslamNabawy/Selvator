@@ -7,11 +7,13 @@ import 'package:wisely/src/application/state/wisely_controller.dart';
 import 'package:wisely/src/domain/entities/catalog_version.dart';
 import 'package:wisely/src/domain/entities/decompress_state.dart';
 import 'package:wisely/src/domain/entities/emotional_weather_point.dart';
+import 'package:wisely/src/domain/entities/journal_entry_filter.dart';
 import 'package:wisely/src/domain/entities/mood_journal_entry.dart';
 import 'package:wisely/src/domain/entities/mood_type.dart';
 import 'package:wisely/src/domain/entities/personalized_greeting.dart';
 import 'package:wisely/src/domain/entities/pool_tier.dart';
 import 'package:wisely/src/domain/entities/quote_entry.dart';
+import 'package:wisely/src/domain/entities/quote_feed_filter.dart';
 import 'package:wisely/src/domain/entities/session_models.dart';
 import 'package:wisely/src/domain/entities/user_profile.dart';
 import 'package:wisely/src/domain/repositories/mood_journal_repository.dart';
@@ -226,6 +228,38 @@ void main() {
     expect(controller.refreshed, isTrue);
   });
 
+  testWidgets('home renders quote feed and filters by popularity', (
+    tester,
+  ) async {
+    final controller = _FakeWiselyController(
+      currentQuote: _quote(id: 'current', text: 'Current gentle quote.'),
+      quoteOfDay: null,
+      quoteFeedQuotes: [
+        _quote(id: 'low', text: 'Low popularity quote.', popularity: 5),
+        _quote(id: 'popular', text: 'Most popular quote.', popularity: 900),
+        _quote(id: 'mid', text: 'Middle popularity quote.', popularity: 100),
+      ],
+    );
+    addTearDown(controller.dispose);
+
+    await _pumpHome(tester, controller);
+
+    expect(find.text('Recommended'), findsOneWidget);
+    expect(find.textContaining('Low popularity quote'), findsOneWidget);
+
+    await tester.tap(find.text('Popular'));
+    await tester.pump();
+
+    expect(controller.lastFeedFilter, QuoteFeedFilter.popular);
+    final popularTop = tester.getTopLeft(
+      find.textContaining('Most popular quote'),
+    );
+    final lowTop = tester.getTopLeft(
+      find.textContaining('Low popularity quote'),
+    );
+    expect(popularTop.dy, lessThan(lowTop.dy));
+  });
+
   testWidgets('home hides Android widget action when widgets are unsupported', (
     tester,
   ) async {
@@ -263,11 +297,14 @@ void main() {
     expect(controller.selectedMoods, isNot(contains(MoodType.love)));
   });
 
-  testWidgets('journal page saves and deletes notes', (tester) async {
+  testWidgets('journal page saves guided reflections with discreet reveal', (
+    tester,
+  ) async {
     final entry = MoodJournalEntry(
       id: 'journal-1',
       mood: MoodType.happy,
       note: 'Existing happy note',
+      needNow: 'A quiet hour',
       createdAt: DateTime(2026, 5, 17, 9),
       updatedAt: DateTime(2026, 5, 17, 9),
     );
@@ -292,7 +329,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Mood journal'), findsNothing);
+    expect(find.text('Safe Space'), findsNothing);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -301,19 +338,44 @@ void main() {
       ),
     );
 
-    expect(find.text('Mood journal'), findsOneWidget);
+    expect(find.text('Safe Space'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Private reflection saved'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.text('Private reflection saved').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Private reflection saved'), findsOneWidget);
+    expect(find.text('Existing happy note'), findsNothing);
+
+    await tester.tap(find.text('Private reflection saved').first);
+    await tester.pump();
     expect(find.text('Existing happy note'), findsOneWidget);
 
     final saveButton = find.text('Save note');
+    await tester.scrollUntilVisible(
+      saveButton,
+      -300,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.ensureVisible(saveButton);
     await tester.pumpAndSettle();
     await tester.tap(saveButton);
     await tester.pump();
     expect(controller.savedNote, isNull);
 
+    await tester.ensureVisible(find.text('What happened?'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('What happened?'));
+    await tester.pump();
     await tester.enterText(
       find.byKey(const Key('mood-journal-note-field')),
       '  New happy note  ',
+    );
+    await tester.enterText(
+      find.byKey(const Key('journal-prompt-situation')),
+      '  Something difficult happened  ',
     );
     await tester.pump();
     await tester.ensureVisible(saveButton);
@@ -322,7 +384,28 @@ void main() {
     await tester.pump();
 
     expect(controller.savedNote, '  New happy note  ');
+    expect(
+      controller.recentJournalEntries.first.situation,
+      'Something difficult happened',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: WiselyTheme.light(),
+        home: Scaffold(body: JournalScreen(controller: controller)),
+      ),
+    );
+    await tester.scrollUntilVisible(
+      find.text('Private reflection saved').first,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.ensureVisible(find.text('Private reflection saved').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Private reflection saved').first);
+    await tester.pump();
     expect(find.text('New happy note'), findsOneWidget);
+    expect(find.text('Something difficult happened'), findsOneWidget);
 
     final deleteButton = find.byTooltip('Delete note').last;
     await tester.ensureVisible(deleteButton);
@@ -577,17 +660,22 @@ Future<void> _pumpHome(
   );
 }
 
-QuoteEntry _quote({required String id}) {
+QuoteEntry _quote({
+  required String id,
+  String text = 'A steady quote designed for widget testing action callbacks.',
+  int popularity = 100,
+  MoodType mood = MoodType.happy,
+}) {
   return QuoteEntry(
     id: id,
-    text: 'A steady quote designed for widget testing action callbacks.',
+    text: text,
     author: 'Test Author',
-    popularity: 100,
-    categories: const ['happy'],
+    popularity: popularity,
+    categories: [mood.name],
     tags: const ['joy'],
-    moods: const [MoodType.happy],
-    moodStrength: const {MoodType.happy: 1},
-    poolTier: const {MoodType.happy: PoolTier.core},
+    moods: [mood],
+    moodStrength: {mood: 1},
+    poolTier: {mood: PoolTier.core},
   );
 }
 
@@ -597,6 +685,7 @@ class _FakeWiselyController implements WiselyController {
     required this.quoteOfDay,
     List<MoodJournalEntry>? recentJournalEntries,
     List<EmotionalWeatherPoint>? emotionalWeather,
+    this.quoteFeedQuotes,
     this.isDecompressing = false,
     this.pendingQuote,
     this.pendingQuoteMood,
@@ -665,13 +754,28 @@ class _FakeWiselyController implements WiselyController {
   final List<MoodJournalEntry> recentJournalEntries;
 
   @override
+  List<MoodJournalEntry> get journalEntries => recentJournalEntries;
+
+  @override
+  JournalEntryFilter journalFilter = JournalEntryFilter.recent;
+
+  @override
+  MoodType? journalMoodFilter;
+
+  @override
+  bool journalDiscreetMode = true;
+
+  @override
   final List<EmotionalWeatherPoint> emotionalWeather;
+
+  final List<QuoteEntry>? quoteFeedQuotes;
 
   QuoteEntry? likedQuote;
   QuoteEntry? copiedQuote;
   QuoteEntry? sharedQuote;
   String? savedNote;
   String? deletedEntryId;
+  QuoteFeedFilter? lastFeedFilter;
   bool refreshed = false;
   bool decompressionCompleted = false;
 
@@ -728,6 +832,31 @@ class _FakeWiselyController implements WiselyController {
   }
 
   @override
+  List<QuoteEntry> quoteFeed({
+    QuoteFeedFilter filter = QuoteFeedFilter.recommended,
+    int limit = 18,
+  }) {
+    lastFeedFilter = filter;
+    final quotes = [...?quoteFeedQuotes];
+    if (quotes.isEmpty && currentQuote != null) {
+      quotes.add(currentQuote!);
+    }
+    switch (filter) {
+      case QuoteFeedFilter.popular:
+        quotes.sort((a, b) => b.popularity.compareTo(a.popularity));
+        break;
+      case QuoteFeedFilter.short:
+        quotes.sort((a, b) => a.text.length.compareTo(b.text.length));
+        break;
+      case QuoteFeedFilter.fresh:
+      case QuoteFeedFilter.deep:
+      case QuoteFeedFilter.recommended:
+        break;
+    }
+    return quotes.take(limit).toList(growable: false);
+  }
+
+  @override
   Future<void> toggleLike([QuoteEntry? target]) async {
     likedQuote = target;
   }
@@ -757,9 +886,28 @@ class _FakeWiselyController implements WiselyController {
 
   @override
   Future<void> saveMoodJournalNote(String note) async {
+    await saveMoodJournalEntry(note: note);
+  }
+
+  @override
+  Future<void> saveMoodJournalEntry({
+    required String note,
+    String situation = '',
+    String feelings = '',
+    String handledWith = '',
+    String needNow = '',
+    String kindSelfTalk = '',
+  }) async {
     savedNote = note;
-    final trimmed = note.trim();
-    if (trimmed.isEmpty) {
+    final values = [
+      note,
+      situation,
+      feelings,
+      handledWith,
+      needNow,
+      kindSelfTalk,
+    ].map((value) => value.trim()).toList(growable: false);
+    if (values.every((value) => value.isEmpty)) {
       return;
     }
     final now = DateTime(2026, 5, 17, 10, recentJournalEntries.length);
@@ -767,8 +915,14 @@ class _FakeWiselyController implements WiselyController {
       0,
       MoodJournalEntry(
         id: 'saved-${recentJournalEntries.length}',
-        mood: selectedMood,
-        note: trimmed,
+        primaryMood: selectedMood,
+        moods: selectedMoods,
+        note: values[0],
+        situation: values[1],
+        feelings: values[2],
+        handledWith: values[3],
+        needNow: values[4],
+        kindSelfTalk: values[5],
         createdAt: now,
         updatedAt: now,
       ),
@@ -779,6 +933,21 @@ class _FakeWiselyController implements WiselyController {
   Future<void> deleteMoodJournalEntry(String id) async {
     deletedEntryId = id;
     recentJournalEntries.removeWhere((entry) => entry.id == id);
+  }
+
+  @override
+  void setJournalFilter(JournalEntryFilter filter) {
+    journalFilter = filter;
+  }
+
+  @override
+  void setJournalMoodFilter(MoodType? mood) {
+    journalMoodFilter = mood;
+  }
+
+  @override
+  void setJournalDiscreetMode(bool value) {
+    journalDiscreetMode = value;
   }
 
   void dispose() {
@@ -850,9 +1019,24 @@ class _NoopMoodJournalRepository implements MoodJournalRepository {
   }
 
   @override
+  List<MoodJournalEntry> entries({
+    List<MoodType>? moods,
+    JournalEntryFilter filter = JournalEntryFilter.recent,
+    int limit = 50,
+  }) {
+    return const [];
+  }
+
+  @override
   Future<void> saveEntry({
     required MoodType mood,
+    List<MoodType>? moods,
     required String note,
+    String situation = '',
+    String feelings = '',
+    String handledWith = '',
+    String needNow = '',
+    String kindSelfTalk = '',
   }) async {}
 
   @override

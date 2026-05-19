@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
 import 'package:wisely/src/data/hive/hive_adapters.dart';
+import 'package:wisely/src/domain/entities/journal_entry_filter.dart';
 import 'package:wisely/src/domain/entities/mood_journal_entry.dart';
 import 'package:wisely/src/domain/entities/mood_type.dart';
 import 'package:wisely/src/domain/repositories/mood_journal_repository.dart';
@@ -25,23 +26,77 @@ class HiveMoodJournalRepository implements MoodJournalRepository {
   @override
   List<MoodJournalEntry> recentEntries({MoodType? mood, int limit = 5}) {
     final filtered = _entries
-        .where((entry) => mood == null || entry.mood == mood)
+        .where((entry) => mood == null || entry.moods.contains(mood))
         .take(limit)
         .toList(growable: false);
     return filtered;
   }
 
   @override
-  Future<void> saveEntry({required MoodType mood, required String note}) async {
-    final trimmed = note.trim();
-    if (trimmed.isEmpty) {
+  List<MoodJournalEntry> entries({
+    List<MoodType>? moods,
+    JournalEntryFilter filter = JournalEntryFilter.recent,
+    int limit = 50,
+  }) {
+    final moodSet = moods?.toSet() ?? const <MoodType>{};
+    final filtered = _entries
+        .where((entry) {
+          final moodMatches =
+              moodSet.isEmpty ||
+              entry.moods.any((mood) => moodSet.contains(mood));
+          if (!moodMatches) {
+            return false;
+          }
+          return switch (filter) {
+            JournalEntryFilter.recent => true,
+            JournalEntryFilter.needNow => entry.hasNeedNow,
+            JournalEntryFilter.handledWith => entry.hasHandledWith,
+          };
+        })
+        .take(limit)
+        .toList(growable: false);
+    return filtered;
+  }
+
+  @override
+  Future<void> saveEntry({
+    required MoodType mood,
+    List<MoodType>? moods,
+    required String note,
+    String situation = '',
+    String feelings = '',
+    String handledWith = '',
+    String needNow = '',
+    String kindSelfTalk = '',
+  }) async {
+    final trimmedNote = note.trim();
+    final trimmedSituation = situation.trim();
+    final trimmedFeelings = feelings.trim();
+    final trimmedHandledWith = handledWith.trim();
+    final trimmedNeedNow = needNow.trim();
+    final trimmedKindSelfTalk = kindSelfTalk.trim();
+    final hasAnyText = [
+      trimmedNote,
+      trimmedSituation,
+      trimmedFeelings,
+      trimmedHandledWith,
+      trimmedNeedNow,
+      trimmedKindSelfTalk,
+    ].any((value) => value.isNotEmpty);
+    if (!hasAnyText) {
       return;
     }
     final now = DateTime.now();
     final entry = MoodJournalEntry(
       id: 'journal-${now.microsecondsSinceEpoch}-${mood.name}',
-      mood: mood,
-      note: trimmed,
+      primaryMood: mood,
+      moods: moods,
+      note: trimmedNote,
+      situation: trimmedSituation,
+      feelings: trimmedFeelings,
+      handledWith: trimmedHandledWith,
+      needNow: trimmedNeedNow,
+      kindSelfTalk: trimmedKindSelfTalk,
       createdAt: now,
       updatedAt: now,
     );
